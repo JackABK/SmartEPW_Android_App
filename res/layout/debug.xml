@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+    android:background="@android:color/white">
+
+
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="200dp"
+        android:layout_alignBottom="@+id/debug_motor_down_button"
+        android:layout_toRightOf="@+id/debug_motor_left_button"
+        android:layout_gravity="left|bottom">
+
+        <TableLayout
+            android:layout_width="211dp"
+            android:layout_height="fill_parent"
+            android:background="@drawable/border"
+            android:stretchColumns="0,1,2">
+
+
+            <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="pwm"
+                    android:id="@+id/pwm_TextView"
+                    android:textSize="12dp"
+                    android:textColor="@android:color/black"
+                    android:autoText="false"
+                    android:gravity="center_horizontal"
+                    android:textStyle="italic"
+                    android:layout_alignParentTop="true"
+                    android:layout_toLeftOf="@+id/linearLayout"
+                    android:layout_column="0" />
+
+                <SeekBar
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/pwm_seekBar"
+                    android:layout_column="1"
+                    android:indeterminate="false"
+                    android:progressDrawable="@drawable/seekbar_style"
+                    android:thumb="@drawable/thumb"
+                    android:layout_span="3"
+                    android:max="255"
+                    android:progress="50" />
+
+                <TextView
+                    android:id="@+id/pwm_progresstext"
+                    android:layout_width="wrap_content"
+                    android:layout_toRightOf="@+id/seekbar_reverse"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:layout_below="@+id/vertical_Seekbar"
+                    android:layout_column="4"
+                    android:text="0" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Kp"
+                    android:id="@+id/Kp_TextView"
+                    android:textSize="12dp"
+                    android:textColor="@android:color/black"
+                    android:autoText="false"
+                    android:gravity="center_horizontal"
+                    android:textStyle="italic"
+                    android:layout_alignParentTop="true"
+                    android:layout_toLeftOf="@+id/linearLayout"
+                    android:layout_column="0" />
+
+                <SeekBar
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/Kp_seekBar"
+                    android:layout_column="0"
+                    android:indeterminate="false"
+                    android:progressDrawable="@drawable/seekbar_style"
+                    android:thumb="@drawable/thumb"
+                    android:layout_span="3"
+                    android:max="50"
+                    android:progress="10" />
+
+                <TextView  android:id="@+id/Kp_progresstext"
+                    android:layout_width="wrap_content"
+                    android:layout_toRightOf="@+id/seekbar_reverse"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:layout_below="@+id/vertical_Seekbar"
+                    android:text="0" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ki"
+                    android:id="@+id/Ki_TextView"
+                    android:textSize="12dp"
+                    android:textColor="@android:color/black"
+                    android:autoText="false"
+                    android:gravity="center_horizontal"
+                    android:textStyle="italic"
+                    android:layout_alignParentTop="true"
+                    android:layout_toLeftOf="@+id/linearLayout"
+                    android:layout_column="0" />
+
+                <SeekBar
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/Ki_seekBar"
+                    android:layout_column="0"
+                    android:indeterminate="false"
+                    android:progressDrawable="@drawable/seekbar_style"
+                    android:thumb="@drawable/thumb"
+                    android:layout_span="3"
+                    android:max="50"
+                    android:progress="10" />
+
+                <TextView  android:id="@+id/Ki_progresstext"
+                    android:layout_width="wrap_content"
+                    android:layout_toRightOf="@+id/seekbar_reverse"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:layout_below="@+id/vertical_Seekbar"
+                    android:text="0" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Kd"
+                    android:id="@+id/Kd_TextView"
+                    android:textSize="12dp"
+                    android:textColor="@android:color/black"
+                    android:autoText="false"
+                    android:gravity="center_horizontal"
+                    android:textStyle="italic"
+                    android:layout_alignParentTop="true"
+                    android:layout_toLeftOf="@+id/linearLayout"
+                    android:layout_column="0" />
+
+                <SeekBar
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/Kd_seekBar"
+                    android:layout_column="0"
+                    android:indeterminate="false"
+                    android:progressDrawable="@drawable/seekbar_style"
+                    android:thumb="@drawable/thumb"
+                    android:layout_span="3"
+                    android:max="50"
+                    android:progress="10" />
+
+                <TextView  android:id="@+id/Kd_progresstext"
+                    android:layout_width="wrap_content"
+                    android:layout_toRightOf="@+id/seekbar_reverse"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:layout_below="@+id/vertical_Seekbar"
+                    android:text="0" />
+
+            </TableRow>
+
+            <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="sound"
+                    android:id="@+id/sound_TextView"
+                    android:textSize="12dp"
+                    android:textColor="@android:color/black"
+                    android:autoText="false"
+                    android:gravity="center_horizontal"
+                    android:textStyle="italic"
+                    android:layout_alignParentTop="true"
+                    android:layout_toLeftOf="@+id/linearLayout"
+                    android:layout_column="0" />
+
+                <SeekBar
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/sound_seekBar"
+                    android:layout_column="0"
+                    android:indeterminate="false"
+                    android:progressDrawable="@drawable/seekbar_style"
+                    android:thumb="@drawable/thumb"
+                    android:layout_span="3"
+                    android:max="50"
+                    android:progress="10" />
+
+                <TextView  android:id="@+id/sound_progresstext"
+                    android:layout_width="wrap_content"
+                    android:layout_toRightOf="@+id/seekbar_reverse"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:layout_below="@+id/vertical_Seekbar"
+                    android:text="0" />
+
+            </TableRow>
+
+        </TableLayout>
+
+        <RelativeLayout
+            android:layout_width="160dp"
+            android:layout_height="fill_parent"
+            android:id="@+id/relativeLayout"
+            android:background="@drawable/border"
+
+            android:layout_gravity="left|bottom">
+
+            <view
+                class="com.zerokol.views.JoystickView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/debug_joystickview"
+                android:clickable="false"
+                android:background="#747aa2"
+                android:focusable="false"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentBottom="true"
+                android:layout_below="@+id/JoystickTitle" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Joystick"
+                android:id="@+id/JoystickTitle"
+                android:textSize="18dp"
+                android:textColor="@android:color/black"
+                android:autoText="false"
+                android:gravity="center_horizontal"
+                android:textStyle="italic"
+                android:layout_column="0"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true" />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="37dp"
+            android:layout_height="fill_parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Power"
+                android:id="@+id/debug_power"
+                android:textSize="18dp"
+                android:layout_gravity="center_vertical"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Angle"
+                android:id="@+id/debug_angle"
+                android:textSize="18dp"
+                android:layout_centerVertical="true"
+                android:layout_alignParentLeft="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="direction"
+                android:id="@+id/debug_direction"
+                android:textSize="18dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true" />
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="550dp"
+        android:layout_height="187dp"
+        android:layout_gravity="right|top"
+        android:id="@+id/chart"
+        >
+
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/shell_ListView"
+        android:layout_width="401dp"
+        android:layout_height="176dp"
+        android:stackFromBottom="true"
+        android:transcriptMode="alwaysScroll"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:cacheColorHint="#00000000"
+        android:divider="#00000000"
+        android:dividerHeight="0dip"
+        android:headerDividersEnabled ="false"
+        android:fadingEdge="none"
+        android:scrollingCache="false"
+        android:drawSelectorOnTop="false"
+        android:layout_gravity="left|top"
+        android:choiceMode="singleChoice" />
+
+    <RelativeLayout
+        android:layout_width="550dp"
+        android:layout_height="300dp"
+        android:background="@drawable/border"
+
+        android:layout_gravity="right|bottom">
+
+        <WebView
+            android:layout_width="fill_parent"
+            android:layout_height="100dp"
+            android:id="@+id/WebCam"
+
+            android:layout_below="@+id/refresh_bt"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true" />
+
+        <ImageButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:id="@+id/refresh_bt"
+            android:background="@drawable/advancedbutton" />
+
+        <ImageButton
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:id="@+id/web_stop_btn"
+            android:background="@drawable/web_stop"
+            android:layout_alignParentTop="true"
+            android:layout_toRightOf="@+id/refresh_bt" />
+
+    </RelativeLayout>
+
+</FrameLayout>

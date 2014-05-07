@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:background="@android:color/white"
+              android:orientation="vertical"
+              android:id="@+id/main_layout"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+    android:weightSum="1">
+
+    <FrameLayout
+            android:layout_width="fill_parent"
+            android:layout_height="28dp"
+        android:background="@drawable/backgroud_4"
+        android:layout_weight="0.01">
+
+        <Button
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:background="@drawable/titlebar_menu_selector"
+                android:id="@+id/title_bar_menu"
+                android:layout_gravity="left|center_vertical"
+                android:layout_marginLeft="10dp"/>
+
+        <TextView
+            android:layout_width="232dp"
+            android:layout_height="60dp"
+            android:text="Designed by JackABK"
+            android:id="@+id/textView"
+            android:textSize="20dp"
+            android:textColor="@android:color/white"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/webcam_read"
+            android:textStyle="bold|italic"
+            android:textIsSelectable="false"
+            android:typeface="serif"
+            android:layout_above="@+id/webcam_read"
+            android:layout_alignParentBottom="false"
+            android:layout_alignParentLeft="false"
+            android:layout_alignWithParentIfMissing="false"
+            android:layout_gravity="right|top" />
+
+    </FrameLayout>
+
+
+</LinearLayout>

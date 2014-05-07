@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources>
+    <string name="app_name">SmartEPW</string>
+
+    <!--  BluetoothChat -->
+    <string name="send">Send</string>
+    <string name="not_connected">You are not connected to a device</string>
+    <string name="bt_not_enabled_leaving">Bluetooth was not enabled. Leaving Bluetooth Chat.</string>
+    <string name="title_connecting">connecting...</string>
+    <string name="title_connected_to">connected: </string>
+    <string name="title_not_connected">not connected</string>
+
+    <!--  DeviceListActivity -->
+    <string name="scanning">scanning for devices...</string>
+    <string name="select_device">select a device to connect</string>
+    <string name="none_paired">No devices have been paired</string>
+    <string name="none_found">No devices found</string>
+    <string name="title_paired_devices">Paired Devices</string>
+    <string name="title_other_devices">Other Available Devices</string>
+    <string name="button_scan">Scan for devices</string>
+
+    <!-- Options Menu -->
+    <string name="connect">Connect a device</string>
+    <string name="discoverable">Make discoverable</string>
+    <string name="up">UP</string>
+    <string name="down">Down</string>
+    <string name="stop">Stop!!</string>
+
+    <string name="str_longitude">經度(Longitude)：</string>
+    <string name="str_latitude">緯度(Latitude)：</string>
+    <string name="str_err_address">地址不存在</string>
+    <string name="str_err_location">無法取得Location</string>
+    <string name="str_my_location">目前所在地址：</string>
+    <string name="str_default_address">台北市圓山捷運站</string>
+    <string name="str_button1">查詢</string>
+    <string name="str_button2">+</string>
+    <string name="str_button3">-</string>
+    <string name="str_title">Hello! This is JackABK</string>
+
+
+    <string name="front_lab">FRONT</string>
+    <string name="front_right_lab">FRONT_RIGHT</string>
+    <string name="right_lab">RIGHT</string>
+    <string name="back_right_lab">BACK_RIGHT</string>
+    <string name="back_lab">BACK</string>
+    <string name="back_left_lab">BACK_LEFT</string>
+    <string name="left_lab">LEFT</string>
+    <string name="left_front_lab">LEFT_FRONT</string>
+    <string name="center_lab">CENTER</string>
+
+</resources>
