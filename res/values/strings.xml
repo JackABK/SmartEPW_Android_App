@@ -61,5 +61,7 @@
     <string name="left_lab">LEFT</string>
     <string name="left_front_lab">LEFT_FRONT</string>
     <string name="center_lab">CENTER</string>
+    <string name="webcam_title">Webcam</string>
+    <string name="display_info">Information</string>
 
 </resources>
