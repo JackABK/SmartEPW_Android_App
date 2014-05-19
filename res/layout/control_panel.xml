@@ -24,111 +24,45 @@
         android:background="@drawable/backgroud_3"
         android:clickable="false">
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentLeft="true"
-            android:layout_below="@+id/Web_Request"
+        <RelativeLayout
+            android:layout_width="400dp"
+            android:layout_height="300dp"
             android:background="@android:color/transparent"
-            android:id="@+id/linearLayout"
-            android:layout_alignRight="@+id/Travel_Info">
+            android:layout_gravity="right|bottom"
+            android:id="@+id/Web_Request"
+            android:clickable="false"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true">
 
-            <RelativeLayout
-                android:layout_width="181dp"
-                android:layout_height="match_parent"
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="60dp"
+                android:text="@string/webcam_title"
+                android:id="@+id/webcam_textView"
+                android:textSize="28dp"
+                android:textColor="@android:color/white"
+                android:textIsSelectable="false"
+                android:typeface="normal"
+                android:layout_alignParentTop="true"
+                android:layout_alignLeft="@+id/direction_imageView" />
+
+            <ImageButton
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:id="@+id/refresh_bt"
+                android:background="@drawable/advancedbutton"
+                android:layout_above="@+id/webcam_read"
+                android:layout_alignParentLeft="true" />
+
+            <ImageView
+                android:layout_width="200dp"
+                android:layout_height="400dp"
+                android:id="@+id/webcam_read"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
                 android:background="@android:color/transparent"
-                android:id="@+id/relativeLayout"
-                android:layout_alignTop="@+id/relativeLayout2"
-                android:layout_toLeftOf="@+id/relativeLayout2"
-                android:layout_marginRight="45dp">
-
-                <TextView
-                    android:layout_width="fill_parent"
-                    android:layout_height="60dp"
-                    android:text="Motor_test"
-                    android:id="@+id/textView2"
-                    android:textSize="30dp"
-                    android:textColor="@android:color/white"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentLeft="true"
-                    android:textStyle="bold|italic"
-                    android:typeface="serif" />
-
-                <SeekBar
-                    android:layout_width="400dp"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/seekBar"
-                    android:max="255"
-                    android:progress="127"
-                    android:progressDrawable="@drawable/seekbar_style"
-                    android:thumb="@drawable/thumb"
-                    android:indeterminate="false"
-                    android:layout_below="@+id/textView2"
-                    android:layout_alignParentLeft="true" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="speed"
-                    android:id="@+id/speed"
-                    android:textSize="18dp"
-                    android:textColor="@android:color/white"
-                    android:autoText="false"
-                    android:gravity="center_horizontal"
-                    android:textStyle="italic"
-                    android:layout_column="0"
-                    android:layout_alignBottom="@+id/textView2"
-                    android:layout_alignRight="@+id/state_textView" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="?android:attr/textAppearanceLarge"
-                    android:text="0"
-                    android:id="@+id/seekbarvalue"
-                    android:background="@android:color/black"
-                    android:layout_alignTop="@+id/speed"
-                    android:layout_alignRight="@+id/powerTextView" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Angle"
-                    android:id="@+id/angleTextView"
-                    android:layout_below="@+id/seekBar"
-                    android:layout_centerHorizontal="true" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="direction"
-                    android:id="@+id/directionTextView"
-                    android:layout_below="@+id/seekBar"
-                    android:layout_alignLeft="@+id/speed" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Power"
-                    android:id="@+id/powerTextView"
-                    android:layout_below="@+id/seekBar"
-                    android:layout_alignParentRight="true" />
-
-                <view
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    class="com.zerokol.views.JoystickView"
-                    android:id="@+id/joystickView"
-                    android:clickable="false"
-                    android:background="#747aa2"
-                    android:focusable="false"
-                    android:layout_alignParentBottom="true"
-                    android:layout_below="@+id/angleTextView"
-                    android:layout_alignParentRight="true" />
-
-            </RelativeLayout>
+                android:layout_alignParentRight="true" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -138,389 +72,44 @@
                 android:id="@+id/state_textView"
                 android:background="@android:color/transparent"
                 android:autoText="true"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentRight="true" />
-
-        </LinearLayout>
-
-        <RelativeLayout
-            android:layout_width="522dp"
-            android:layout_height="280dp"
-            android:background="@android:color/transparent"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:id="@+id/User_Guidelines">
-
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/direction_imageView"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentTop="true"
-
-                android:layout_alignParentRight="true"
-                android:src="@drawable/v1_arrow_left"
-                android:background="@android:color/transparent" />
-
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="60dp"
-                android:text="Guideline"
-                android:id="@+id/textView5"
-                android:textSize="28dp"
-                android:textColor="@android:color/white"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentRight="true"
-                android:layout_toRightOf="@+id/webcam_read"
-                android:textStyle="bold|italic"
-                android:textIsSelectable="false"
-                android:typeface="serif"
-                android:layout_above="@+id/webcam_read" />
-        </RelativeLayout>
-
-        <RelativeLayout
-            android:layout_width="550dp"
-            android:layout_height="300dp"
-            android:background="@android:color/transparent"
-            android:layout_gravity="right|bottom"
-            android:id="@+id/Web_Request"
-            android:layout_alignLeft="@+id/User_Guidelines"
-            android:layout_above="@+id/User_Guidelines"
-            android:clickable="false">
-
-            <ImageButton
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:id="@+id/refresh_bt"
-                android:background="@drawable/advancedbutton" />
-
-            <ImageButton
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:id="@+id/web_stop_btn"
-                android:background="@drawable/web_stop"
-                android:layout_alignParentTop="true"
-                android:layout_toRightOf="@+id/refresh_bt" />
-
-            <ImageView
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:id="@+id/webcam_read"
-                android:layout_alignParentBottom="true"
-                android:layout_below="@+id/refresh_bt"
-                android:layout_alignParentLeft="true"
-                android:background="@android:color/transparent" />
+                android:layout_alignBottom="@+id/webcam_read"
+                android:layout_alignParentLeft="true" />
 
         </RelativeLayout>
 
         <RelativeLayout
-            android:layout_width="400dp"
+            android:layout_width="250dp"
             android:layout_height="200dp"
             android:id="@+id/Travel_Info"
+            android:background="@android:color/transparent"
             android:layout_alignParentTop="true"
-            android:layout_alignParentLeft="true"
-            android:background="@android:color/transparent">
-
-            <TableLayout
-                android:layout_width="211dp"
-                android:layout_height="130dp"
-                android:background="@drawable/border"
-                android:stretchColumns="0,1,2"
-                android:id="@+id/tableLayout"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentLeft="true">
-
-                <TableRow
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent" >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="U0"
-                        android:id="@+id/ultrasonic_0_textView"
-                        android:textSize="12dp"
-                        android:textColor="@android:color/black"
-                        android:autoText="false"
-                        android:gravity="center_horizontal"
-                        android:textStyle="italic"
-                        android:layout_alignParentTop="true"
-                        android:layout_toLeftOf="@+id/linearLayout"
-                        android:layout_column="0" />
-
-                    <ProgressBar
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/rpm_right_ProgressBar"
-                        android:layout_alignParentRight="true"
-                        android:progress="0"
-                        android:indeterminate="false"
-                        android:progressDrawable="@drawable/set_progress_bar"
-                        android:layout_toRightOf="@+id/tableLayout"
-                        android:layout_column="1"
-                        android:layout_span="2"
-                        android:max="255" />
-
-                    <TextView
-                        android:id="@+id/pwm_progresstext"
-                        android:layout_width="wrap_content"
-                        android:layout_toRightOf="@+id/seekbar_reverse"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:layout_below="@+id/vertical_Seekbar"
-                        android:layout_column="11"
-                        android:text="0"
-                        android:layout_span="5" />
-
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent" >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="U1"
-                        android:id="@+id/ultrasonic_1_textView"
-                        android:textSize="12dp"
-                        android:textColor="@android:color/black"
-                        android:autoText="false"
-                        android:gravity="center_horizontal"
-                        android:textStyle="italic"
-                        android:layout_alignParentTop="true"
-                        android:layout_toLeftOf="@+id/linearLayout"
-                        android:layout_column="0" />
-
-                    <ProgressBar
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/ultrasonic_1_ProgressBar"
-                        android:layout_alignParentRight="true"
-                        android:progress="0"
-                        android:indeterminate="false"
-                        android:progressDrawable="@drawable/set_progress_bar"
-                        android:layout_toRightOf="@+id/tableLayout"
-                        android:layout_span="2"
-                        android:max="255" />
-
-                    <TextView
-                        android:id="@+id/ultrasonic_1_testView"
-                        android:layout_width="wrap_content"
-                        android:layout_toRightOf="@+id/seekbar_reverse"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:layout_below="@+id/vertical_Seekbar"
-                        android:text="0"
-                        android:layout_column="12"
-                        android:layout_span="4" />
-
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent" >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="U2"
-                        android:id="@+id/ultrasonic_2_textView"
-                        android:textSize="12dp"
-                        android:textColor="@android:color/black"
-                        android:autoText="false"
-                        android:gravity="center_horizontal"
-                        android:textStyle="italic"
-                        android:layout_alignParentTop="true"
-                        android:layout_toLeftOf="@+id/linearLayout"
-                        android:layout_column="0" />
-
-                    <ProgressBar
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/ultrasonic_2_ProgressBar"
-                        android:layout_alignParentRight="true"
-                        android:progress="0"
-                        android:indeterminate="false"
-                        android:progressDrawable="@drawable/set_progress_bar"
-                        android:layout_toRightOf="@+id/tableLayout"
-                        android:layout_span="5"
-                        android:max="255" />
-
-                    <TextView
-                        android:id="@+id/ultrasonic_2_testView"
-                        android:layout_width="wrap_content"
-                        android:layout_toRightOf="@+id/seekbar_reverse"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:layout_below="@+id/vertical_Seekbar"
-                        android:text="0"
-                        android:layout_column="13"
-                        android:layout_span="3" />
-
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent" >
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="U3"
-                        android:id="@+id/ultrasonic_3_textView"
-                        android:textSize="12dp"
-                        android:textColor="@android:color/black"
-                        android:autoText="false"
-                        android:gravity="center_horizontal"
-                        android:textStyle="italic"
-                        android:layout_alignParentTop="true"
-                        android:layout_toLeftOf="@+id/linearLayout"
-                        android:layout_column="0" />
-
-                    <ProgressBar
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/ultrasonic_3_ProgressBar"
-                        android:layout_alignParentRight="true"
-                        android:progress="0"
-                        android:indeterminate="false"
-                        android:progressDrawable="@drawable/set_progress_bar"
-                        android:layout_toRightOf="@+id/tableLayout"
-                        android:layout_span="5"
-                        android:max="255" />
-
-                    <TextView
-                        android:id="@+id/ultrasonic_3_testView"
-                        android:layout_width="wrap_content"
-                        android:layout_toRightOf="@+id/seekbar_reverse"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:layout_below="@+id/vertical_Seekbar"
-                        android:text="0"
-                        android:layout_column="14"
-                        android:layout_span="2" />
-
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:background="@android:color/transparent">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="RPM_L"
-                        android:id="@+id/rpm_left_textView"
-                        android:textSize="12dp"
-                        android:textColor="@android:color/black"
-                        android:autoText="false"
-                        android:gravity="center_horizontal"
-                        android:textStyle="italic"
-                        android:layout_alignParentTop="true"
-                        android:layout_toLeftOf="@+id/linearLayout"
-                        android:layout_column="0" />
-
-                    <ProgressBar
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/rpm_left_ProgressBar"
-                        android:layout_alignParentRight="true"
-                        android:progress="0"
-                        android:indeterminate="false"
-                        android:progressDrawable="@drawable/set_progress_bar"
-                        android:layout_toRightOf="@+id/tableLayout"
-                        android:layout_span="5"
-                        android:max="255" />
-
-                    <TextView
-                        android:id="@+id/rpm_left_textView"
-                        android:layout_width="wrap_content"
-                        android:layout_toRightOf="@+id/seekbar_reverse"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:layout_below="@+id/vertical_Seekbar"
-                        android:text="0"
-                        android:layout_column="15" />
-
-                </TableRow>
-
-                <TableRow
-                    android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:id="@+id/tableRow">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="RPM_R"
-                        android:id="@+id/rpm_right_TextView3"
-                        android:textSize="12dp"
-                        android:textColor="@android:color/black"
-                        android:autoText="false"
-                        android:gravity="center_horizontal"
-                        android:textStyle="italic"
-                        android:layout_alignParentTop="true"
-                        android:layout_toLeftOf="@+id/linearLayout"
-                        android:layout_column="0" />
-
-                    <ProgressBar
-                        style="?android:attr/progressBarStyleHorizontal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:id="@+id/rpm_right_ProgressBar"
-                        android:layout_alignParentRight="true"
-                        android:progress="0"
-                        android:indeterminate="false"
-                        android:progressDrawable="@drawable/set_progress_bar"
-                        android:layout_toRightOf="@+id/tableLayout"
-                        android:layout_column="1"
-                        android:layout_span="2"
-                        android:max="255" />
-
-                    <TextView
-                        android:id="@+id/rpm_right_textView"
-                        android:layout_width="wrap_content"
-                        android:layout_toRightOf="@+id/seekbar_reverse"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"
-                        android:layout_below="@+id/vertical_Seekbar"
-                        android:text="0"
-                        android:layout_column="15" />
-                </TableRow>
-
-            </TableLayout>
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/Web_Request">
 
             <RelativeLayout
                 android:layout_width="100dp"
-                android:layout_height="fill_parent"
-                android:layout_below="@+id/tableLayout"
-                android:layout_alignParentLeft="true"
-                android:background="@drawable/border"
-                android:id="@+id/relativeLayout3">
+                android:layout_height="70dp"
+                android:background="@android:color/transparent"
+                android:id="@+id/relativeLayout3"
+                android:layout_alignParentBottom="true"
+                android:layout_toLeftOf="@+id/relativeLayout4"
+                android:layout_below="@+id/kmh_display">
 
                 <TextView
                     android:layout_width="100dp"
-                    android:layout_height="14dp"
-                    android:text="Actuator A LS"
-                    android:id="@+id/textView4"
-                    android:textSize="12dp"
-                    android:textColor="@android:color/black"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentLeft="true" />
+                    android:layout_height="40dp"
+                    android:text="Actuator A"
+                    android:id="@+id/Actuator_A_LS_textView"
+                    android:textSize="15dp"
+                    android:textColor="@android:color/white"
+                    android:layout_alignParentLeft="true"
+                    android:layout_above="@+id/actuator_A_LS_Upper_radioButton" />
 
                 <RadioButton
                     android:layout_width="40dp"
                     android:layout_height="35dp"
                     android:id="@+id/actuator_A_LS_Upper_radioButton"
-                    android:checked="true"
+                    android:checked="false"
                     android:layout_alignParentBottom="true"
                     android:layout_toRightOf="@+id/LS_A_up_testView" />
 
@@ -530,7 +119,7 @@
                     android:text="U"
                     android:id="@+id/LS_A_up_testView"
                     android:textSize="12dp"
-                    android:textColor="@android:color/black"
+                    android:textColor="@android:color/white"
                     android:autoText="false"
                     android:gravity="center_horizontal"
                     android:textStyle="italic"
@@ -552,7 +141,7 @@
                     android:text="L"
                     android:id="@+id/textView3"
                     android:textSize="12dp"
-                    android:textColor="@android:color/black"
+                    android:textColor="@android:color/white"
                     android:autoText="false"
                     android:gravity="center_horizontal"
                     android:textStyle="italic"
@@ -564,28 +153,28 @@
 
             <RelativeLayout
                 android:layout_width="100dp"
-                android:layout_height="fill_parent"
-                android:background="@drawable/border"
+                android:layout_height="70dp"
+                android:background="@android:color/transparent"
                 android:id="@+id/relativeLayout4"
-                android:layout_alignTop="@+id/relativeLayout3"
-                android:layout_toRightOf="@+id/relativeLayout3"
-                android:layout_alignRight="@+id/tableLayout">
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignTop="@+id/relativeLayout3">
 
                 <TextView
                     android:layout_width="100dp"
-                    android:layout_height="14dp"
-                    android:text="Actuator B LS"
-                    android:id="@+id/textView6"
-                    android:textSize="12dp"
-                    android:textColor="@android:color/black"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentLeft="true" />
+                    android:layout_height="40dp"
+                    android:text="Actuator B"
+                    android:id="@+id/Actuator_B_LS_textView"
+                    android:textSize="15dp"
+                    android:textColor="@android:color/white"
+                    android:layout_alignParentLeft="true"
+                    android:layout_above="@+id/actuator_B_LS_Upper_radioButton" />
 
                 <RadioButton
                     android:layout_width="40dp"
                     android:layout_height="35dp"
                     android:id="@+id/actuator_B_LS_Upper_radioButton"
-                    android:checked="true"
+                    android:checked="false"
                     android:layout_alignParentBottom="true"
                     android:layout_toRightOf="@+id/textView7" />
 
@@ -595,7 +184,7 @@
                     android:text="U"
                     android:id="@+id/textView7"
                     android:textSize="12dp"
-                    android:textColor="@android:color/black"
+                    android:textColor="@android:color/white"
                     android:autoText="false"
                     android:gravity="center_horizontal"
                     android:textStyle="italic"
@@ -617,7 +206,7 @@
                     android:text="L"
                     android:id="@+id/textView8"
                     android:textSize="12dp"
-                    android:textColor="@android:color/black"
+                    android:textColor="@android:color/white"
                     android:autoText="false"
                     android:gravity="center_horizontal"
                     android:textStyle="italic"
@@ -626,7 +215,279 @@
                     android:layout_toRightOf="@+id/actuator_B_LS_Upper_radioButton" />
             </RelativeLayout>
 
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="60dp"
+                android:text="@string/display_info"
+                android:id="@+id/display_textView"
+                android:textSize="28dp"
+                android:textColor="@android:color/white"
+                android:textIsSelectable="false"
+                android:typeface="normal"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true" />
+
+            <ImageView
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/direction_imageView"
+
+                android:src="@drawable/stop_icon_v1"
+                android:background="@android:color/transparent"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentBottom="true"
+                android:layout_toLeftOf="@+id/relativeLayout3" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:ems="10"
+                android:id="@+id/kmh_display"
+                android:background="@android:color/transparent"
+                android:text="0"
+                android:textColor="#fffff602"
+                android:textSize="40dp"
+                android:layout_below="@+id/textView"
+                android:layout_alignRight="@+id/relativeLayout3"
+                android:layout_toRightOf="@+id/direction_imageView"
+                android:editable="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Speed"
+                android:id="@+id/textView"
+                android:textSize="35dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignRight="@+id/relativeLayout3"
+                android:layout_marginRight="32dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="km/h"
+                android:id="@+id/textView4"
+                android:textSize="20dp"
+                android:layout_alignBottom="@+id/kmh_display"
+                android:layout_toRightOf="@+id/textView" />
+
         </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:id="@+id/relativeLayout"
+            android:layout_alignParentBottom="true"
+            android:layout_toRightOf="@+id/Web_Request"
+            android:layout_below="@+id/Travel_Info">
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="40dp"
+                android:text="Controller"
+                android:id="@+id/textView2"
+                android:textSize="30dp"
+                android:textColor="@android:color/white"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:typeface="normal" />
+
+            <RadioGroup
+                android:layout_width="wrap_content"
+                android:layout_height="60dp"
+                android:id="@+id/ControlMode"
+                android:baselineAligned="false"
+                android:orientation='horizontal'
+                android:clickable="false"
+                android:layout_below="@+id/textView2"
+                android:layout_alignParentLeft="true">
+
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Position Mode"
+                    android:id="@+id/PositionMode"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Normal Mode"
+                    android:id="@+id/NormalMode"
+                    android:layout_gravity="right"
+                    android:checked="false" />
+
+            </RadioGroup>
+
+            <SeekBar
+                android:layout_width="160dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/ctrl_duration"
+                android:layout_column="1"
+                android:indeterminate="false"
+                android:progressDrawable="@drawable/seekbar_style"
+                android:thumb="@drawable/thumb"
+                android:layout_span="3"
+                android:max="50"
+                android:progress="0"
+                android:layout_centerVertical="true"
+                android:layout_alignLeft="@+id/ctrl_speed"
+                android:thumbOffset="0dp" />
+
+            <SeekBar
+                android:layout_width="160dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/ctrl_speed"
+                android:layout_column="1"
+                android:indeterminate="false"
+                android:progressDrawable="@drawable/seekbar_style"
+                android:thumb="@drawable/thumb"
+                android:layout_span="3"
+                android:max="10"
+                android:progress="0"
+                android:layout_below="@+id/ControlMode"
+                android:layout_alignRight="@+id/ControlMode"
+                android:thumbOffset="0dp" />
+
+            <TextView
+                android:id="@+id/ctrl_duration_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_column="4"
+                android:text="0"
+                android:textSize="25dp"
+                android:layout_alignTop="@+id/ctrl_duration"
+                android:layout_alignParentRight="true" />
+
+            <TextView
+                android:id="@+id/ctrl_speed_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:layout_column="4"
+                android:text="0"
+                android:textSize="25dp"
+                android:layout_alignTop="@+id/ctrl_speed"
+                android:layout_alignLeft="@+id/ctrl_duration_value" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="duration"
+                android:id="@+id/textView9"
+                android:textSize="16dp"
+                android:textColor="@android:color/white"
+                android:autoText="false"
+                android:gravity="center_horizontal"
+                android:textStyle="italic"
+                android:layout_column="0"
+                android:layout_alignBottom="@+id/ctrl_duration"
+                android:layout_alignParentLeft="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="speed"
+                android:id="@+id/textView10"
+                android:textSize="16dp"
+                android:textColor="@android:color/white"
+                android:autoText="false"
+                android:gravity="center_horizontal"
+                android:textStyle="italic"
+                android:layout_column="0"
+                android:layout_alignTop="@+id/ctrl_speed"
+                android:layout_alignParentLeft="true" />
+
+            <Button
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:text="+"
+                android:id="@+id/ctrl_speed_plus"
+                android:background="@drawable/button_style_1"
+                android:textColor="@android:color/white"
+                android:textSize="25dp"
+                android:layout_alignTop="@+id/ctrl_speed"
+                android:layout_toLeftOf="@+id/ctrl_speed" />
+
+            <Button
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:text="+"
+                android:id="@+id/ctrl_duration_plus"
+                android:background="@drawable/button_style_1"
+                android:textColor="@android:color/white"
+                android:layout_alignTop="@+id/ctrl_duration"
+                android:layout_alignLeft="@+id/ctrl_speed_plus"
+                android:textSize="25dp" />
+
+            <Button
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:text="-"
+                android:id="@+id/ctrl_speed_minus"
+                android:background="@drawable/button_style_1"
+                android:textColor="@android:color/white"
+                android:textSize="25dp"
+                android:layout_alignTop="@+id/ctrl_speed_plus"
+                android:layout_toLeftOf="@+id/ctrl_speed_plus" />
+
+            <Button
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:text="-"
+                android:id="@+id/ctrl_duration_minus"
+                android:background="@drawable/button_style_1"
+                android:textColor="@android:color/white"
+                android:textSize="25dp"
+                android:layout_alignTop="@+id/ctrl_duration_plus"
+                android:layout_alignLeft="@+id/ctrl_speed_minus" />
+
+
+        </RelativeLayout>
+
+        <view
+            class="com.zerokol.views.JoystickView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/joystickView"
+            android:clickable="false"
+            android:background="@android:color/transparent"
+
+            android:focusable="false"
+
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/relativeLayout" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="direction"
+            android:id="@+id/directionTextView"
+            android:typeface="normal"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/relativeLayout" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Angle"
+            android:id="@+id/angleTextView"
+            android:layout_alignTop="@+id/directionTextView"
+            android:layout_toRightOf="@+id/directionTextView"
+            android:layout_marginLeft="47dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Power"
+            android:id="@+id/powerTextView"
+            android:layout_alignTop="@+id/angleTextView"
+            android:layout_alignParentRight="true" />
 
     </RelativeLayout>
 
