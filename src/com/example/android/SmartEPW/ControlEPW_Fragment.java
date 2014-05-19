@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.Image;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
 import android.os.AsyncTask;
@@ -30,7 +29,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.SmartEPW.R;
+import com.example.android.SmartEPW.util.FormatConvert;
 import com.zerokol.views.JoystickView;
 
 import org.apache.http.HttpResponse;
@@ -78,6 +77,10 @@ public class ControlEPW_Fragment extends Fragment {
     private TextView seekBarValue;
     private SeekBar seekBar;
 
+    /*Button for settings of speed and delay*/
+    private Button mSpeedPlusBtn,mSpeedMinusBtn = null ;
+    private Button mDurationPlusBtn,mDurationMinusBtn = null;
+
     /*test debug used*/
     private TextView mStateTextView;
 
@@ -103,6 +106,12 @@ public class ControlEPW_Fragment extends Fragment {
     private boolean isMoved = false;
 
 
+    /*SeekBar  and the relative TextView */
+    SeekBar mSpeedSeekBar , mDurationSeekBar= null;
+    TextView mSpeedSeekBar_Progress , mDurationSeekBar_Progress= null;
+
+
+
     /*SoundPool*/
     private SoundPool soundPool = null;
     private static final float LEFT_VOLUME = 1.0F;
@@ -125,7 +134,40 @@ public class ControlEPW_Fragment extends Fragment {
     /*show the direction in imageView*/
     private ImageView dir_image;
 
+    /*used to display the km/h of EPW speed*/
+    private static TextView Kmh_display = null;
 
+    /*URL of Server and HTTP get parameter.*/
+
+    private final String SERVER_MAIN_URL = "http://140.116.164.46:8080/";
+    private final String SERVER_TYPE_COMMAND="?action=command";
+    private final String SERVER_TYPE_SNAPSHOT="?action=snapshot";
+    private String server_parameter="";
+    private String server_url = "";
+
+    private boolean ready_to_send_command = false;
+
+    /*command parameter type of _SmartEPW*/
+    private static final int GROUP_EPW = 0;
+    private static final int ID_EPW_MOTOR_DIRECTION = 100;
+    private static final int ID_EPW_MOTOR_SPEED = 101;
+    private static final int ID_EPW_LINEAR_ACTUATOR_A = 102;
+    private static final int ID_EPW_LINEAR_ACTUATOR_B = 103;
+    private static final int ID_PID_ALG_KP = 104;
+    private static final int ID_PID_ALG_KI = 105;
+    private static final int ID_PID_ALG_KD = 106;
+    /*information parameter type of _SmartEPW*/
+    private static final int ID_ULTRASONIC_0_ = 200;
+    private static final int ID_ULTRASONIC_1 = 201;
+    private static final int ID_ULTRASONIC_2 = 202;
+    private static final int ID_ULTRASONIC_3 = 203;
+    private static final int ID_ACTUATOR_A_LS = 204;
+    private static final int ID_ACTUATOR_B_LS = 205;
+    private static final int ID_MOTOR_LEFT_RPM = 206;
+    private static final int ID_MOTOR_RIGHT_RPM = 207;
+
+    /*direction control with duration time of EPW*/
+    private int dir_ctrl_duration;//unit: ms
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -172,18 +214,17 @@ public class ControlEPW_Fragment extends Fragment {
         } else {
             if (mChatService == null) {
                 setupChat();
-
+                setupController();
+                setupJoystick();
+                setupEPW_Info();
+                setupWebcam();
             }
         }
-
-
     }
-
 
     @Override
     public synchronized void onResume() {
         super.onResume();
-
         // Performing this check in onResume() covers the case in which BT was
         // not enabled during onStart(), so we were paused to enable it...
         // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
@@ -192,6 +233,7 @@ public class ControlEPW_Fragment extends Fragment {
             if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
                 // Start the Bluetooth chat services
                 mChatService.start();
+
             }
         }
     }
@@ -245,6 +287,10 @@ public class ControlEPW_Fragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (D) Log.e(TAG, "+++ ON CREATE +++");
         setupChat();
+        setupController();
+        setupJoystick();
+        setupEPW_Info();
+        setupWebcam();
 
     }
 
@@ -267,6 +313,10 @@ public class ControlEPW_Fragment extends Fragment {
                 if (resultCode == Activity.RESULT_OK) {
                     // Bluetooth is now enabled, so set up a chat session
                     setupChat();
+                    setupController();
+                    setupJoystick();
+                    setupEPW_Info();
+                    setupWebcam();
 
                 } else {
                     // User did not enable Bluetooth or an error occured
@@ -284,7 +334,7 @@ public class ControlEPW_Fragment extends Fragment {
                     // If the action is a key-up event on the return key, send the message
                     if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
                         String message = view.getText().toString();
-                        sendMessage(message);
+                        //sendMessage(message);
                     }
                     if (D) Log.i(TAG, "END onEditorAction");
                     return true;
@@ -348,31 +398,37 @@ public class ControlEPW_Fragment extends Fragment {
         // Initialize the array adapter for the conversation thread
         mConversationArrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.message);
 
+        // Initialize the BluetoothChatService to perform bluetooth connections
+        mChatService = new BluetoothChatService(getActivity(), mHandler);
+        // Initialize the buffer for outgoing messages
+        mOutStringBuffer = new StringBuffer("");
+    }
+
+    private void setupWebcam(){
         /*=========read the webcam from the url display to ImageView*/
         displayWebcam = (ImageView) getActivity().findViewById(R.id.webcam_read);
-        String URL = "http://140.116.164.36:8080/?action=snapshot";
+        String URL = "http://140.116.164.46:8080/?action=snapshot";
         displayWebcam.setTag(URL);/*set the url into the imageView.*/
-        new UpdateImagesTask().execute(displayWebcam); //start to loop update the ImageView from the url.
+        new updateImagesTask().execute(displayWebcam); //start to loop update the Image from the server's webcam.
+    }
+
+    private void setupEPW_Info(){
+        /*get JSON from the EPW server*/
+        new updateSmartEPW_Info_Task().execute("http://140.116.164.46:8080/output.json");
+
+        Kmh_display = (TextView) getActivity().findViewById(R.id.kmh_display);
+
+    }
 
 
 
-        /*image of the EPW direction */
-        dir_image = (ImageView) getActivity().findViewById(R.id.direction_imageView);
-
-
-        /*get JSON from the URL*/
-        new HttpAsyncTask().execute("http://140.116.164.36:8080/output.json");
-
-
+    private void setupJoystick(){
         /*testing debug mode*/
         mStateTextView = (TextView) getActivity().findViewById(R.id.state_textView);
-
-
 
         mAngleTextView = (TextView) getActivity().findViewById(R.id.angleTextView);
         mPowerTextView = (TextView) getActivity().findViewById(R.id.powerTextView);
         mDirectionTextView = (TextView) getActivity().findViewById(R.id.directionTextView);
-
 
         //Referencing also other views
         mJoystick = (JoystickView) getActivity().findViewById(R.id.joystickView);
@@ -387,7 +443,7 @@ public class ControlEPW_Fragment extends Fragment {
                     case JoystickView.FRONT:
                         mDirectionTextView.setText(R.string.front_lab);
                         mStateTextView.setText("Forward");
-                        sendCommandListToEPW((byte)'f' ,(byte)(Integer.parseInt(seekBarValue.getText().toString()) & 0xFF) );
+                        sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'f');
                         dir_image.setImageResource(R.drawable.v1_arrow_up);
                         break;
                     case JoystickView.FRONT_RIGHT:
@@ -396,7 +452,7 @@ public class ControlEPW_Fragment extends Fragment {
                     case JoystickView.RIGHT:
                         mDirectionTextView.setText(R.string.right_lab);
                         mStateTextView.setText("Right");
-                        sendCommandListToEPW((byte)'r' ,(byte)(Integer.parseInt(seekBarValue.getText().toString()) & 0xFF) );
+                        sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'r');
                         dir_image.setImageResource(R.drawable.v1_arrow_right);
                         break;
                     case JoystickView.BACK_RIGHT:
@@ -405,7 +461,7 @@ public class ControlEPW_Fragment extends Fragment {
                     case JoystickView.BACK:
                         mDirectionTextView.setText(R.string.back_lab);
                         mStateTextView.setText("Backward");
-                        sendCommandListToEPW((byte)'b' ,(byte)(Integer.parseInt(seekBarValue.getText().toString()) & 0xFF) );
+                        sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'b');
                         dir_image.setImageResource(R.drawable.v1_arrow_down);
                         break;
                     case JoystickView.BACK_LEFT:
@@ -414,7 +470,7 @@ public class ControlEPW_Fragment extends Fragment {
                     case JoystickView.LEFT:
                         mDirectionTextView.setText(R.string.left_lab);
                         mStateTextView.setText("Left");
-                        sendCommandListToEPW((byte)'l' ,(byte)(Integer.parseInt(seekBarValue.getText().toString()) & 0xFF) );
+                        sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'l');
                         dir_image.setImageResource(R.drawable.v1_arrow_left);
                         break;
                     case JoystickView.FRONT_LEFT:
@@ -423,25 +479,36 @@ public class ControlEPW_Fragment extends Fragment {
                     default:/*center*/
                         mDirectionTextView.setText(R.string.center_lab);
                         mStateTextView.setText("Stop");
-                        sendCommandListToEPW((byte)'s' ,(byte)(Integer.parseInt(seekBarValue.getText().toString()) & 0xFF) );
+                        dir_image.setImageResource(R.drawable.stop_icon_v1);
+                        sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'s');
                 }
             }
         }, JoystickView.DEFAULT_LOOP_INTERVAL);
 
+        /*it's used to showing the Joystick's direction by ImageView*/
+        dir_image = (ImageView) getActivity().findViewById(R.id.direction_imageView);
+    }
 
 
+    private void setupController() {
+        Log.d(TAG, "setup Controller");
 
-      /*=====================SeekBar Connector=================================================*/
-      /*==================Ref to http://androidbiancheng.blogspot.tw/2010/02/seekbar.html======*/
-        seekBarValue = (TextView) getActivity().findViewById(R.id.seekbarvalue);
-        seekBar = (SeekBar) getActivity().findViewById(R.id.seekBar);
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        /*create new object of the send command method in AsyncTask.*/
+        new Http_sendCommand_Task().execute(SERVER_MAIN_URL);
 
+
+        /**
+         * SeekBar
+         * Ref to https://github.com/AndroSelva/Vertical-SeekBar-Android
+         **/
+        //Speed of Seekbar
+        mSpeedSeekBar=(SeekBar)getActivity().findViewById(R.id.ctrl_speed);
+        mSpeedSeekBar_Progress=(TextView)getActivity().findViewById(R.id.ctrl_speed_value);
+        mSpeedSeekBar.setMax(10);
+        mSpeedSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress,
-                                          boolean fromUser) {
+            public void onStopTrackingTouch(SeekBar seekBar) {
                 // TODO Auto-generated method stub
-                seekBarValue.setText(String.valueOf(progress));
             }
 
             @Override
@@ -450,48 +517,113 @@ public class ControlEPW_Fragment extends Fragment {
             }
 
             @Override
+            public void onProgressChanged(SeekBar seekBar, int progress,
+                                          boolean fromUser) {
+                mSpeedSeekBar_Progress.setText(String.valueOf(progress));
+                sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_SPEED,mSpeedSeekBar.getProgress()*12);
+            }
+        });
+        //Delay of Seekbar
+        mDurationSeekBar=(SeekBar)getActivity().findViewById(R.id.ctrl_duration);
+        mDurationSeekBar_Progress=(TextView)getActivity().findViewById(R.id.ctrl_duration_value);
+        mDurationSeekBar.setMax(50);
+        mDurationSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                // TODO Auto-generated method stub
+            }
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress,
+                                          boolean fromUser) {
+                mDurationSeekBar_Progress.setText(String.valueOf(FormatConvert.IntToFloatByScale(progress, 0.1f)));
+                /**
+                 * dir_ctrl_duration is represent millisecond,
+                 * so the dir_ctrl_duration will convert to msec.
+                 *
+                 **/
+                dir_ctrl_duration = mDurationSeekBar.getProgress()*100;
             }
         });
 
 
-        // Initialize the BluetoothChatService to perform bluetooth connections
-        mChatService = new BluetoothChatService(getActivity(), mHandler);
-        // Initialize the buffer for outgoing messages
-        mOutStringBuffer = new StringBuffer("");
-    }
-    /**
-     * Sends a message.
-     *
-     * @param message A string of text to send.
-     */
-    private void
-    sendMessage(String message) {
-        // Check that we're actually connected before trying anything
-        if (mChatService.getState() != BluetoothChatService.STATE_CONNECTED) {
-            Toast.makeText(getActivity(), R.string.not_connected, Toast.LENGTH_SHORT).show();
-            return;
-        }
+        /*Speed control of button*/
+        mSpeedPlusBtn = (Button)getActivity().findViewById(R.id.ctrl_speed_plus);
+        mSpeedPlusBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mSpeedSeekBar.getProgress() >= mSpeedSeekBar.getMax()) {
+                    return;
+                }
+                else {
+                    mSpeedSeekBar.setProgress(mSpeedSeekBar.getProgress() + 1);
+                    mSpeedSeekBar_Progress.setText(String.valueOf(mSpeedSeekBar.getProgress()));
+                    /*motor speed value of EPW divided into ten parts, the stm32f4 allowing of acceptable pwm range is 0 to 120, corresponds 0 to 2.5 volts*/
+                    sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_SPEED,mSpeedSeekBar.getProgress()*12);
 
-        // Check that there's actually something to send
-        if (message.length() > 0) {
-            // Get the message bytes and tell the BluetoothChatService to write
-            byte[] send = new byte[0];
-            try {
-                send = message.getBytes("UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+                }
             }
-
-            mStateTextView.setText(String.valueOf(send.length));
-            mChatService.write(send);
-
-            // Reset out string buffer to zero and clear the edit text field
-            mOutStringBuffer.setLength(0);
-
-        }
+        });
+        mSpeedMinusBtn = (Button)getActivity().findViewById(R.id.ctrl_speed_minus);
+        mSpeedMinusBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mSpeedSeekBar.getProgress() <= 0) {
+                    return;
+                }
+                else {
+                    mSpeedSeekBar.setProgress(mSpeedSeekBar.getProgress() - 1);
+                    mSpeedSeekBar_Progress.setText(String.valueOf(mSpeedSeekBar.getProgress()));
+                    /*motor speed value of EPW divided into ten parts, the stm32f4 allowing of acceptable pwm range is 0 to 120, corresponds 0 to 2.5 volts*/
+                    sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_SPEED,mSpeedSeekBar.getProgress()*12);
+                }
+            }
+        });
+        /*Delay control of button*/
+        mDurationPlusBtn = (Button)getActivity().findViewById(R.id.ctrl_duration_plus);
+        mDurationPlusBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mDurationSeekBar.getProgress() >= mDurationSeekBar.getMax()) {
+                    return;
+                }
+                else {
+                    mDurationSeekBar.setProgress(mDurationSeekBar.getProgress() + 5);
+                    mDurationSeekBar_Progress.setText(String.valueOf(FormatConvert.IntToFloatByScale(mDurationSeekBar.getProgress(), 0.1f)));
+                    /**
+                     * dir_ctrl_duration is represent millisecond,
+                     * so the dir_ctrl_duration will convert to msec.
+                     *
+                     **/
+                    dir_ctrl_duration = mDurationSeekBar.getProgress()*100;
+                }
+            }
+        });
+        mDurationMinusBtn = (Button)getActivity().findViewById(R.id.ctrl_duration_minus);
+        mDurationMinusBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(mDurationSeekBar.getProgress() <= 0) {
+                    return;
+                }
+                else {
+                    mDurationSeekBar.setProgress(mDurationSeekBar.getProgress() - 5);
+                    mDurationSeekBar_Progress.setText(String.valueOf(FormatConvert.IntToFloatByScale(mDurationSeekBar.getProgress(), 0.1f)));
+                    /**
+                     * dir_ctrl_duration is represent millisecond,
+                     * so the dir_ctrl_duration will convert to msec.
+                     *
+                     **/
+                    dir_ctrl_duration = mDurationSeekBar.getProgress()*100;
+                }
+            }
+        });
     }
+
 
     /**
      *  accept user input the keydown event
@@ -499,34 +631,39 @@ public class ControlEPW_Fragment extends Fragment {
      **/
     public void myOnKeyDown(int keyCode , KeyEvent event){
         switch (keyCode) {
-            case KeyEvent.KEYCODE_I:
+            case KeyEvent.KEYCODE_I:/*up*/
                 mJoystick.setPostion((mJoystick.getWidth())/ 2 , 0);
                 mJoystick.invalidate(); /*invalidate is implement to move the joystick's circle*/
-                sendCommandListToEPW((byte)'f' ,(byte)(Integer.parseInt(seekBarValue.getText().toString()) & 0xFF) );
+                sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'f');
+                dir_image.setImageResource(R.drawable.v1_arrow_up);
                 isMoved = true;
                 break;
-            case KeyEvent.KEYCODE_M:
+            case KeyEvent.KEYCODE_M:/*down*/
                 mJoystick.setPostion((mJoystick.getWidth())/ 2 , mJoystick.getHeight());
                 mJoystick.invalidate();
-                sendCommandListToEPW((byte)'b' ,(byte)(Integer.parseInt(seekBarValue.getText().toString()) & 0xFF) );
+                sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'b');
+                dir_image.setImageResource(R.drawable.v1_arrow_down);
                 isMoved = true;
                 break;
-            case KeyEvent.KEYCODE_T:
+            case KeyEvent.KEYCODE_T:/*left*/
                 mJoystick.setPostion(0 , mJoystick.getHeight()/2);
                 mJoystick.invalidate();
-                sendCommandListToEPW((byte)'l' ,(byte)(Integer.parseInt(seekBarValue.getText().toString()) & 0xFF) );
+                sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'l');
+                dir_image.setImageResource(R.drawable.v1_arrow_left);
                 isMoved = true;
                 break;
-            case KeyEvent.KEYCODE_E:
+            case KeyEvent.KEYCODE_E:/*right && stop*/
                 if(isMoved){
                     /*stop to move*/
                     mJoystick.setPostion(mJoystick.getWidth()/2 , mJoystick.getHeight()/2);
-                    sendCommandListToEPW((byte)'s' ,(byte)(Integer.parseInt(seekBarValue.getText().toString()) & 0xFF) );
+                    sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'s');
+                    dir_image.setImageResource(R.drawable.stop_icon_v1);
                     isMoved = false;
                 }
-                else{
+                else{/*right*/
                     mJoystick.setPostion(mJoystick.getWidth() , mJoystick.getHeight()/2);
-                    sendCommandListToEPW((byte)'r' ,(byte)(Integer.parseInt(seekBarValue.getText().toString()) & 0xFF) );
+                    sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'r');
+                    dir_image.setImageResource(R.drawable.v1_arrow_right);
                     isMoved = true;
                 }
                 mJoystick.invalidate();
@@ -534,18 +671,40 @@ public class ControlEPW_Fragment extends Fragment {
             default:
                 break;
         }
+
+
+        /*there should be add loop function to keeping send command for specified time period*/
+
+         /*keep in the restrict time, force return the joystick to center of position after 1 sec.*/
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                /*stop to move*/
+                mJoystick.setPostion(mJoystick.getWidth() / 2, mJoystick.getHeight() / 2);
+
+                mAngleTextView.setText(" " + String.valueOf(0) + "°");
+                mPowerTextView.setText(" " + String.valueOf(0) + "%");
+                mDirectionTextView.setText(R.string.center_lab);
+
+                mJoystick.invalidate();
+                isMoved = false;
+            }
+        }, dir_ctrl_duration);
     }
 
     /**
-     * send the command list to stm32f4 MCU,
-     * @param control_cmd, pwm_value.
+     * send command to EPW of stm32f4 MCU using by http get method.
+     * for example http request such as:
+     * http://140.116.164.46:8080/?action=command&dest=1&plugin=0&id=100&group=0&value=102
+     * @param group, id, value.
      */
-    public void sendCommandListToEPW(byte control_cmd , byte pwm_value ){
-        byte[] command_array;
-        command_array = new byte[]{control_cmd, pwm_value};
-        mChatService.write(command_array);
+    public void sendCommandToEPW(int group,int id,int value){
+        //note, dest and plugin are fixed.
+        server_parameter = "&dest=1&plugin=0" + ("&group="+String.valueOf(group)) + ("&id="+String.valueOf(id)) + ("&value="+String.valueOf(value));
+        Log.d("JackABK",server_parameter);
+        ready_to_send_command = true;
     }
-
     /**
      * play all of the sound.
      * @param resId, for example: R.raw.test
@@ -555,11 +714,58 @@ public class ControlEPW_Fragment extends Fragment {
         mMediaPlayer.start();
     }
 
+
+
+    /**
+     * using http get method to parse the url, note that should be running in background thread, cannot in the UI thread,
+     * so that the function must be in AsyncTask.
+     * @param url
+     */
+    private  String HTTP_GET_PARSER(String url){
+        InputStream inputStream = null;
+        String result = "";
+        try {
+
+            // create HttpClient
+            HttpClient httpclient = new DefaultHttpClient();
+
+            // make GET request to the given URL
+            HttpResponse httpResponse = httpclient.execute(new HttpGet(url));
+
+            // receive response as inputStream
+            inputStream = httpResponse.getEntity().getContent();
+
+            // convert inputstream to string
+            if(inputStream != null)
+                result = convertInputStreamToString(inputStream);
+            else
+                result = "Did not work!";
+                Toast.makeText(this.getActivity(), "Host not found!", Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) {
+            Log.d("InputStream", e.getLocalizedMessage());
+        }
+
+        return result;
+    }
+
+    private  String convertInputStreamToString(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
+        String line = "";
+        String result = "";
+        while((line = bufferedReader.readLine()) != null)
+            result += line;
+
+        inputStream.close();
+        return result;
+
+    }
+
     /**
      * create AsyncTask thread to read picture from the url path.
      * more details please see http://stackoverflow.com/questions/3090650/android-loading-an-image-from-the-web-with-asynctask
      */
-    public class UpdateImagesTask extends AsyncTask<ImageView, Bitmap, Bitmap> {
+    public class updateImagesTask extends AsyncTask<ImageView, Bitmap, Bitmap> {
 
         ImageView imageView = null;
         Bitmap Bitmap_temp =null;
@@ -613,69 +819,67 @@ public class ControlEPW_Fragment extends Fragment {
             }
         }
     }
-    private class HttpAsyncTask extends AsyncTask<String, Void, String> {
+
+    private class updateSmartEPW_Info_Task extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... urls) {
-            return GET(urls[0]);
+            JSONObject json = null;
+            JSONArray controls = null;
+            int i;
+            while(true) {
+                try {
+                    json = new JSONObject(HTTP_GET_PARSER(urls[0]));
+
+                    /* showing to Logcat.
+                    String str = "";
+                    JSONArray controls = json.getJSONArray("controls");
+                    str += "controls length = " + json.getJSONArray("controls").length();
+                    str += "\n--------\n";
+                    str += "names: " + controls.getJSONObject(0).names();
+                    str += "\n--------\n";
+                    str += "id: " + controls.getJSONObject(17).getString("id");scanning
+                    Log.d(TAG, str);
+                    */
+
+                    controls = json.getJSONArray("controls");
+                    /*scanning all information of json to find out the expected index*/
+                    for(i=0;i<json.getJSONArray("controls").length();i++){
+                        if(Integer.valueOf(controls.getJSONObject(i).getString("id"))== ID_MOTOR_RIGHT_RPM )
+                            Kmh_display.setText(controls.getJSONObject(i).getString("value"));
+                    }
+                } catch (JSONException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+            }
+            //return HTTP_GET_PARSER(urls[0]); //without return to PostExecute.
+        }
+        @Override
+        protected void onPostExecute(String result) {
+           ;
+        }
+    }
+
+    /**
+     * A {@link this#sendCommandToEPW} that update the url parameter and response the "ready_to_send_command" of signal.
+     * This Task will loop processing the URL to Request server using http get method.
+     */
+    private class Http_sendCommand_Task extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... urls) {
+            server_url = urls[0];
+            while(true) {
+                if(ready_to_send_command){
+                    HTTP_GET_PARSER(server_url + SERVER_TYPE_COMMAND + server_parameter);
+                    ready_to_send_command = false;//back to non-ready of state
+                }
+            }
         }
         // onPostExecute displays the results of the AsyncTask.
         @Override
         protected void onPostExecute(String result) {
-            try {
-                JSONObject json = new JSONObject(result);
-
-                String str = "";
-
-                JSONArray controls = json.getJSONArray("controls");
-                str += "controls length = "+json.getJSONArray("controls").length();
-                str += "\n--------\n";
-                str += "names: "+controls.getJSONObject(0).names();
-                str += "\n--------\n";
-                str += "id: "+controls.getJSONObject(17).getString("id");
-                Log.d(TAG, str);
-            } catch (JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-
-        private  String GET(String url){
-            InputStream inputStream = null;
-            String result = "";
-            try {
-
-                // create HttpClient
-                HttpClient httpclient = new DefaultHttpClient();
-
-                // make GET request to the given URL
-                HttpResponse httpResponse = httpclient.execute(new HttpGet(url));
-
-                // receive response as inputStream
-                inputStream = httpResponse.getEntity().getContent();
-
-                // convert inputstream to string
-                if(inputStream != null)
-                    result = convertInputStreamToString(inputStream);
-                else
-                    result = "Did not work!";
-
-            } catch (Exception e) {
-                Log.d("InputStream", e.getLocalizedMessage());
-            }
-
-            return result;
-        }
-
-        private  String convertInputStreamToString(InputStream inputStream) throws IOException {
-            BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
-            String line = "";
-            String result = "";
-            while((line = bufferedReader.readLine()) != null)
-                result += line;
-
-            inputStream.close();
-            return result;
-
+            ;//don't need to parse the result string.
         }
     }
 
