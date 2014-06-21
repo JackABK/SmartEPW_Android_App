@@ -139,7 +139,7 @@ public class ControlEPW_Fragment extends Fragment {
 
     /*URL of Server and HTTP get parameter.*/
 
-    private final String SERVER_MAIN_URL = "http://140.116.164.46:8080/";
+    private final String SERVER_MAIN_URL = "http://10.0.0.1:8080/";
     private final String SERVER_TYPE_COMMAND="?action=command";
     private final String SERVER_TYPE_SNAPSHOT="?action=snapshot";
     private String server_parameter="";
@@ -407,20 +407,18 @@ public class ControlEPW_Fragment extends Fragment {
     private void setupWebcam(){
         /*=========read the webcam from the url display to ImageView*/
         displayWebcam = (ImageView) getActivity().findViewById(R.id.webcam_read);
-        String URL = "http://140.116.164.46:8080/?action=snapshot";
+        String URL = "http://10.0.0.1:8080/?action=snapshot";
         displayWebcam.setTag(URL);/*set the url into the imageView.*/
         new updateImagesTask().execute(displayWebcam); //start to loop update the Image from the server's webcam.
     }
 
     private void setupEPW_Info(){
         /*get JSON from the EPW server*/
-        new updateSmartEPW_Info_Task().execute("http://140.116.164.46:8080/output.json");
+        new updateSmartEPW_Info_Task().execute("http://10.0.0.1:8080/output.json");
 
         Kmh_display = (TextView) getActivity().findViewById(R.id.kmh_display);
 
     }
-
-
 
     private void setupJoystick(){
         /*testing debug mode*/
