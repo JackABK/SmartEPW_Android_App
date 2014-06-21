@@ -518,7 +518,7 @@ public class ControlEPW_Fragment extends Fragment {
             public void onProgressChanged(SeekBar seekBar, int progress,
                                           boolean fromUser) {
                 mSpeedSeekBar_Progress.setText(String.valueOf(progress));
-                sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_SPEED,mSpeedSeekBar.getProgress()*12);
+                sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_SPEED,mSpeedSeekBar.getProgress());
             }
         });
         //Delay of Seekbar
@@ -561,7 +561,7 @@ public class ControlEPW_Fragment extends Fragment {
                     mSpeedSeekBar.setProgress(mSpeedSeekBar.getProgress() + 1);
                     mSpeedSeekBar_Progress.setText(String.valueOf(mSpeedSeekBar.getProgress()));
                     /*motor speed value of EPW divided into ten parts, the stm32f4 allowing of acceptable pwm range is 0 to 120, corresponds 0 to 2.5 volts*/
-                    sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_SPEED,mSpeedSeekBar.getProgress()*12);
+                    //sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_SPEED,mSpeedSeekBar.getProgress());
 
                 }
             }
@@ -577,7 +577,7 @@ public class ControlEPW_Fragment extends Fragment {
                     mSpeedSeekBar.setProgress(mSpeedSeekBar.getProgress() - 1);
                     mSpeedSeekBar_Progress.setText(String.valueOf(mSpeedSeekBar.getProgress()));
                     /*motor speed value of EPW divided into ten parts, the stm32f4 allowing of acceptable pwm range is 0 to 120, corresponds 0 to 2.5 volts*/
-                    sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_SPEED,mSpeedSeekBar.getProgress()*12);
+                    //sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_SPEED,mSpeedSeekBar.getProgress());
                 }
             }
         });
@@ -843,7 +843,7 @@ public class ControlEPW_Fragment extends Fragment {
                     /*scanning all information of json to find out the expected index*/
                     for(i=0;i<json.getJSONArray("controls").length();i++){
                         if(Integer.valueOf(controls.getJSONObject(i).getString("id"))== ID_MOTOR_RIGHT_RPM )
-                            Kmh_display.setText(controls.getJSONObject(i).getString("value"));
+                            ;//Kmh_display.setText(controls.getJSONObject(i).getString("value"));
                     }
                 } catch (JSONException e) {
                     // TODO Auto-generated catch block
