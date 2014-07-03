@@ -56,28 +56,12 @@ public class ControlEPW_Fragment extends Fragment {
     private static final String TAG = "JackABK Debug";
     private static final boolean D = true;
 
-    // Message types sent from the BluetoothChatService Handler
-    public static final int MESSAGE_STATE_CHANGE = 1;
-    public static final int MESSAGE_READ = 2;
-    public static final int MESSAGE_WRITE = 3;
-    public static final int MESSAGE_DEVICE_NAME = 4;
-    public static final int MESSAGE_TOAST = 5;
-
     // Key names received from the BluetoothChatService Handler
     public static final String DEVICE_NAME = "device_name";
     public static final String TOAST = "toast";
 
-    // Intent request codes
-    private static final int REQUEST_CONNECT_DEVICE = 1;
-    private static final int REQUEST_ENABLE_BT = 2;
-
     // Layout Views
     private TextView mTitle;
-
-
-    /*SeekBar  and the relative TextView */
-    private TextView seekBarValue;
-    private SeekBar seekBar;
 
     /*Button for settings of distance and delay*/
     private Button mDistancePlusBtn, mDistanceMinusBtn = null;
@@ -95,17 +79,6 @@ public class ControlEPW_Fragment extends Fragment {
     /*test debug used*/
     private TextView mStateTextView;
 
-    // Name of the connected device
-    private String mConnectedDeviceName = null;
-    // Array adapter for the conversation thread
-    private ArrayAdapter<String> mConversationArrayAdapter;
-    // String buffer for outgoing messages
-    private StringBuffer mOutStringBuffer;
-    // Local Bluetooth adapter
-    private BluetoothAdapter mBluetoothAdapter = null;
-    // Member object for the chat services
-    private BluetoothChatService mChatService = null;
-
     // Importing also other views
     private JoystickView mJoystick;
 
@@ -121,7 +94,6 @@ public class ControlEPW_Fragment extends Fragment {
     SeekBar mDistanceSeekBar, mDurationSeekBar = null;
     TextView mDistanceSeekBar_Progress, mDurationSeekBar_Progress = null;
 
-
     /*SoundPool*/
     private SoundPool soundPool = null;
     private static final float LEFT_VOLUME = 1.0F;
@@ -136,26 +108,24 @@ public class ControlEPW_Fragment extends Fragment {
 
     private MediaPlayer mMediaPlayer = null;
 
-
     /*Read webcam from url and display to ImageView.*/
     private ImageView displayWebcam;
-
 
     /*show the direction in imageView*/
     private ImageView dir_image;
 
     /*used to display the km/h of EPW Distance*/
-    private static TextView Kmh_display = null;
+    private static TextView Kmh_display_left = null;
+    private static TextView Kmh_display_right = null;
+
     /*display the Actuator of limit switch states.*/
     private static RadioButton Actuator_A_LS_Upper = null, Actuator_A_LS_Lower = null, Actuator_B_LS_Upper = null, Actuator_B_LS_Lower = null;
 
     /*URL of Server and HTTP get parameter.*/
-
     private final String SERVER_MAIN_URL = "http://10.0.0.1:8080/";
     private final String SERVER_TYPE_COMMAND = "?action=command";
     private final String SERVER_TYPE_SNAPSHOT = "?action=snapshot";
     private final String SERVER_TYPE_GETJSON = "output.json";
-
     private String server_parameter = "";
     private String server_url = "";
 
@@ -223,9 +193,7 @@ public class ControlEPW_Fragment extends Fragment {
         inflater = getActivity().getMenuInflater();
         inflater.inflate(R.menu.option_menu, menu);
         super.onCreateOptionsMenu(menu, inflater);
-
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -252,7 +220,6 @@ public class ControlEPW_Fragment extends Fragment {
         setupJoystick();
         setupEPW_Info();
         setupWebcam();
-
     }
 
 
@@ -274,7 +241,8 @@ public class ControlEPW_Fragment extends Fragment {
         /*get JSON from the EPW server*/
         String getJSON_URL = SERVER_MAIN_URL + SERVER_TYPE_GETJSON;
         new updateSmartEPW_Info_Task().execute(getJSON_URL);
-        Kmh_display = (TextView) getActivity().findViewById(R.id.kmh_display);
+        Kmh_display_left = (TextView) getActivity().findViewById(R.id.kmh_display_left);
+        Kmh_display_right = (TextView) getActivity().findViewById(R.id.kmh_display_right);
         Actuator_A_LS_Upper = (RadioButton) getActivity().findViewById(R.id.actuator_A_LS_Upper_radioButton);
         Actuator_A_LS_Lower = (RadioButton) getActivity().findViewById(R.id.actuator_A_LS_Lower_radioButton);
         Actuator_B_LS_Upper = (RadioButton) getActivity().findViewById(R.id.actuator_B_LS_Upper_radioButton);
@@ -347,11 +315,7 @@ public class ControlEPW_Fragment extends Fragment {
                 }
             }
         }, JoystickView.DEFAULT_LOOP_INTERVAL);
-
-
     }
-
-
     private void setupController() {
         Log.d(TAG, "setup Controller");
 
@@ -413,8 +377,6 @@ public class ControlEPW_Fragment extends Fragment {
                 dir_ctrl_duration = progress * 100;
             }
         });
-
-
         /*distance control of button*/
         mDistancePlusBtn = (Button) getActivity().findViewById(R.id.ctrl_distance_plus);
         mDistancePlusBtn.setOnClickListener(new View.OnClickListener() {
@@ -461,8 +423,6 @@ public class ControlEPW_Fragment extends Fragment {
                 }
             }
         });
-
-
         mActuator_A_MinusBtn = (Button) getActivity().findViewById(R.id.actuA_ctrl_minus);
         mActuator_A_MinusBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -515,7 +475,6 @@ public class ControlEPW_Fragment extends Fragment {
                 sendCommandToEPW(GROUP_EPW, ID_EPW_LINEAR_ACTUATOR_B, 0);
             }
         });
-
         /*for PID adjust*/
         mKp_EditText = (EditText) getActivity().findViewById(R.id.Kp_editText);
         mKi_EditText = (EditText) getActivity().findViewById(R.id.Ki_editText);
@@ -530,10 +489,7 @@ public class ControlEPW_Fragment extends Fragment {
                 sendCommandToEPW(GROUP_EPW, ID_PID_ALG_KD,  Integer.valueOf(String.valueOf(mKd_EditText.getText())));
             }
         });
-
     }
-
-
     /**
      * accept user input the keydown event
      * and calculate the joystick's circle direction
@@ -594,8 +550,6 @@ public class ControlEPW_Fragment extends Fragment {
             default:
                 break;
         }
-
-
         /*there should be add loop function to keeping send command for specified time period*/
 
          /*keep in the restrict time, force return the joystick to center of position after 1 sec.*/
@@ -617,12 +571,10 @@ public class ControlEPW_Fragment extends Fragment {
             }
         }, dir_ctrl_duration);
     }
-
     /**
      * send command to EPW of stm32f4 MCU using by http get method.
      * for example http request such as:
      * http://10.0.0.1:8080/?action=command&dest=1&plugin=0&id=100&group=0&value=102
-     *
      * @param group, id, value.
      */
     public void sendCommandToEPW(int group, int id, int value) {
@@ -641,8 +593,6 @@ public class ControlEPW_Fragment extends Fragment {
         mMediaPlayer = MediaPlayer.create(getActivity(), resId);
         mMediaPlayer.start();
     }
-
-
     /**
      * using http get method to parse the url, note that should be running in background thread, cannot in the UI thread,
      * so that the function must be in AsyncTask.
@@ -750,7 +700,7 @@ public class ControlEPW_Fragment extends Fragment {
     private class updateSmartEPW_Info_Task extends AsyncTask<String, Integer, String> {
         JSONObject json = null;
         JSONArray controls = null; //the json group name.
-        double kmh_temp;
+        double kmh_left_temp, kmh_right_temp;
         @Override
         protected String doInBackground(String... urls) {
             int i;
@@ -797,8 +747,11 @@ public class ControlEPW_Fragment extends Fragment {
                     case ID_ACTUATOR_B_LS:
                         update_actuator_B_LS(controls.getJSONObject(values[0]).getString("value"));
                         break;
+                    case ID_MOTOR_LEFT_RPM:
+                        update_kmh_left(controls.getJSONObject(values[0]).getString("value"));
+                        break;
                     case ID_MOTOR_RIGHT_RPM:
-                        update_kmh(controls.getJSONObject(values[0]).getString("value"));
+                        update_kmh_right(controls.getJSONObject(values[0]).getString("value"));
                         break;
                     default:
                         break;
@@ -812,17 +765,22 @@ public class ControlEPW_Fragment extends Fragment {
         protected void onPostExecute(String result) {
             ;
         }
-
-
-        private void update_kmh(String kmh_value) {
-
-            //0.11 = 60*22*2.54*3.14159 / 100 / 1000
-            kmh_temp = Integer.valueOf(kmh_value) *0.11;
-
-            Kmh_display.setText(String.valueOf( kmh_temp));
-            Log.d(TAG, kmh_value);
+        private void update_kmh_left(String kmh_value) {
+            /*
+             * the diameter of wheelchair is 22 inch.
+             * 0.11 = 60*22*2.54*3.14159 / 100 / 1000.
+             */
+            kmh_left_temp = Integer.valueOf(kmh_value) *0.11;
+            Kmh_display_left.setText(String.valueOf( kmh_left_temp));
         }
-
+        private void update_kmh_right(String kmh_value) {
+            /*
+             * the diameter of wheelchair is 22 inch.
+             * 0.11 = 60*22*2.54*3.14159 / 100 / 1000.
+             */
+            kmh_right_temp = Integer.valueOf(kmh_value) *0.11;
+            Kmh_display_right.setText(String.valueOf( kmh_right_temp));
+        }
         private void update_actuator_A_LS(String actuator_A_LS_value) {
             switch (Integer.valueOf(actuator_A_LS_value)) {
                 //normal state.
@@ -847,7 +805,6 @@ public class ControlEPW_Fragment extends Fragment {
                     break;
             }
         }
-
         private void update_actuator_B_LS(String actuator_B_LS_value) {
             switch (Integer.valueOf(actuator_B_LS_value)) {
                 //normal state.
@@ -873,7 +830,6 @@ public class ControlEPW_Fragment extends Fragment {
             }
         }
     }
-
         /**
          * A {@link this#sendCommandToEPW} that update the url parameter and response the "ready_to_send_command" of signal.
          * This Task will loop processing the URL to Request server using http get method.
@@ -889,7 +845,6 @@ public class ControlEPW_Fragment extends Fragment {
                     }
                 }
             }
-
             // onPostExecute displays the results of the AsyncTask.
             @Override
             protected void onPostExecute(String result) {
@@ -898,4 +853,3 @@ public class ControlEPW_Fragment extends Fragment {
         }
 
     }
-
