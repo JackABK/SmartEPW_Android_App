@@ -93,7 +93,7 @@
                 android:id="@+id/relativeLayout3"
                 android:layout_alignParentBottom="true"
                 android:layout_toLeftOf="@+id/relativeLayout4"
-                android:layout_below="@+id/kmh_display">
+                android:layout_below="@+id/kmh_display_left">
 
                 <TextView
                     android:layout_width="100dp"
@@ -102,8 +102,8 @@
                     android:id="@+id/Actuator_A_LS_textView"
                     android:textSize="15dp"
                     android:textColor="@android:color/white"
-                    android:layout_alignParentLeft="true"
-                    android:layout_above="@+id/actuator_A_LS_Upper_radioButton" />
+                    android:layout_alignBottom="@+id/textView3"
+                    android:layout_alignParentLeft="true" />
 
                 <RadioButton
                     android:layout_width="40dp"
@@ -154,6 +154,20 @@
                     android:layout_alignTop="@+id/actuator_A_LS_Upper_radioButton"
                     android:layout_toRightOf="@+id/actuator_A_LS_Upper_radioButton" />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:inputType="number"
+                    android:ems="10"
+                    android:id="@+id/kmh_display_right"
+                    android:background="@android:color/transparent"
+                    android:text="0"
+                    android:textColor="#fffff602"
+                    android:textSize="40dp"
+                    android:editable="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentLeft="true" />
+
             </RelativeLayout>
 
             <RelativeLayout
@@ -172,8 +186,8 @@
                     android:id="@+id/Actuator_B_LS_textView"
                     android:textSize="15dp"
                     android:textColor="@android:color/white"
-                    android:layout_alignParentLeft="true"
-                    android:layout_above="@+id/actuator_B_LS_Upper_radioButton" />
+                    android:layout_alignBottom="@+id/textView8"
+                    android:layout_alignParentLeft="true" />
 
                 <RadioButton
                     android:layout_width="40dp"
@@ -253,15 +267,15 @@
                 android:layout_height="wrap_content"
                 android:inputType="number"
                 android:ems="10"
-                android:id="@+id/kmh_display"
+                android:id="@+id/kmh_display_left"
                 android:background="@android:color/transparent"
                 android:text="0"
                 android:textColor="#fffff602"
                 android:textSize="40dp"
-                android:layout_below="@+id/textView"
-                android:layout_alignRight="@+id/relativeLayout3"
+                android:editable="true"
+                android:layout_alignBottom="@+id/textView4"
                 android:layout_toRightOf="@+id/direction_imageView"
-                android:editable="true" />
+                android:layout_toLeftOf="@+id/relativeLayout4" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -279,8 +293,9 @@
                 android:text="km/h"
                 android:id="@+id/textView4"
                 android:textSize="20dp"
-                android:layout_alignBottom="@+id/kmh_display"
-                android:layout_toRightOf="@+id/textView" />
+                android:layout_below="@+id/display_textView"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="25dp" />
 
         </RelativeLayout>
 
@@ -459,7 +474,7 @@
                 android:textColor="@android:color/white"
                 android:textSize="25dp"
                 android:layout_below="@+id/ControlMode"
-                android:layout_toLeftOf="@+id/ctrl_distance" />
+                android:layout_toRightOf="@+id/ctrl_distance_minus" />
 
             <Button
                 android:layout_width="30dp"
@@ -481,7 +496,7 @@
                 android:textColor="@android:color/white"
                 android:textSize="25dp"
                 android:layout_alignTop="@+id/ctrl_distance_plus"
-                android:layout_toLeftOf="@+id/ctrl_distance_plus" />
+                android:layout_toRightOf="@+id/textView10" />
 
             <Button
                 android:layout_width="30dp"
@@ -491,8 +506,8 @@
                 android:background="@drawable/button_style_1"
                 android:textColor="@android:color/white"
                 android:textSize="25dp"
-                android:layout_alignTop="@+id/textView9"
-                android:layout_toRightOf="@+id/textView9" />
+                android:layout_above="@+id/textView5"
+                android:layout_alignLeft="@+id/ctrl_distance_minus" />
 
             <Button
                 android:layout_width="30dp"
