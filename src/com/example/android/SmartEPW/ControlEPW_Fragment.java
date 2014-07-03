@@ -24,7 +24,9 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -77,9 +79,18 @@ public class ControlEPW_Fragment extends Fragment {
     private TextView seekBarValue;
     private SeekBar seekBar;
 
-    /*Button for settings of speed and delay*/
-    private Button mSpeedPlusBtn,mSpeedMinusBtn = null ;
-    private Button mDurationPlusBtn,mDurationMinusBtn = null;
+    /*Button for settings of distance and delay*/
+    private Button mDistancePlusBtn, mDistanceMinusBtn = null;
+    private Button mDurationPlusBtn, mDurationMinusBtn = null;
+
+    /*Button for the actuaotr A and B.*/
+    private Button mActuator_A_PlusBtn, mActuator_A_MinusBtn = null;
+    private Button mActuator_B_PlusBtn, mActuator_B_MinusBtn = null;
+
+
+    /*EditText for the PID par.*/
+    private EditText mKp_EditText, mKi_EditText, mKd_EditText = null;
+    private Button mPID_par_send=null;
 
     /*test debug used*/
     private TextView mStateTextView;
@@ -107,9 +118,8 @@ public class ControlEPW_Fragment extends Fragment {
 
 
     /*SeekBar  and the relative TextView */
-    SeekBar mSpeedSeekBar , mDurationSeekBar= null;
-    TextView mSpeedSeekBar_Progress , mDurationSeekBar_Progress= null;
-
+    SeekBar mDistanceSeekBar, mDurationSeekBar = null;
+    TextView mDistanceSeekBar_Progress, mDurationSeekBar_Progress = null;
 
 
     /*SoundPool*/
@@ -134,15 +144,19 @@ public class ControlEPW_Fragment extends Fragment {
     /*show the direction in imageView*/
     private ImageView dir_image;
 
-    /*used to display the km/h of EPW speed*/
+    /*used to display the km/h of EPW Distance*/
     private static TextView Kmh_display = null;
+    /*display the Actuator of limit switch states.*/
+    private static RadioButton Actuator_A_LS_Upper = null, Actuator_A_LS_Lower = null, Actuator_B_LS_Upper = null, Actuator_B_LS_Lower = null;
 
     /*URL of Server and HTTP get parameter.*/
 
     private final String SERVER_MAIN_URL = "http://10.0.0.1:8080/";
-    private final String SERVER_TYPE_COMMAND="?action=command";
-    private final String SERVER_TYPE_SNAPSHOT="?action=snapshot";
-    private String server_parameter="";
+    private final String SERVER_TYPE_COMMAND = "?action=command";
+    private final String SERVER_TYPE_SNAPSHOT = "?action=snapshot";
+    private final String SERVER_TYPE_GETJSON = "output.json";
+
+    private String server_parameter = "";
     private String server_url = "";
 
     private boolean ready_to_send_command = false;
@@ -150,7 +164,7 @@ public class ControlEPW_Fragment extends Fragment {
     /*command parameter type of _SmartEPW*/
     private static final int GROUP_EPW = 0;
     private static final int ID_EPW_MOTOR_DIRECTION = 100;
-    private static final int ID_EPW_MOTOR_SPEED = 101;
+    private static final int ID_EPW_MOTOR_Distance = 101;
     private static final int ID_EPW_LINEAR_ACTUATOR_A = 102;
     private static final int ID_EPW_LINEAR_ACTUATOR_B = 103;
     private static final int ID_PID_ALG_KP = 104;
@@ -172,25 +186,11 @@ public class ControlEPW_Fragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //-------------------------------Bluetooth part----------------------------------------//
 
-        // Get local Bluetooth adapter
-        mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        // If the adapter is null, then Bluetooth is not supported
-        if (mBluetoothAdapter == null) {
-            Toast.makeText(getActivity(), "Bluetooth is not available", Toast.LENGTH_LONG).show();
-            getActivity().finish();
-            return;
-        }
-        //-------------------------------------------------------------------------------------//
         // Set up the custom title
         mTitle = (TextView) getActivity().findViewById(R.id.title_left_text);
         mTitle.setText(R.string.app_name);
         mTitle = (TextView) getActivity().findViewById(R.id.title_right_text);
-
-
-
 
         /*enable optionsmenu*/
         setHasOptionsMenu(true);
@@ -204,47 +204,18 @@ public class ControlEPW_Fragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-
-        // If BT is not on, request that it be enabled.
-        // setupChat() will then be called during onActivityResult
-        if (!mBluetoothAdapter.isEnabled()) {
-            Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
-            // Otherwise, setup the chat session
-        } else {
-            if (mChatService == null) {
-                setupChat();
-                setupController();
-                setupJoystick();
-                setupEPW_Info();
-                setupWebcam();
-            }
-        }
     }
 
     @Override
     public synchronized void onResume() {
         super.onResume();
-        // Performing this check in onResume() covers the case in which BT was
-        // not enabled during onStart(), so we were paused to enable it...
-        // onResume() will be called when ACTION_REQUEST_ENABLE activity returns.
-        if (mChatService != null) {
-            // Only if the state is STATE_NONE, do we know that we haven't started already
-            if (mChatService.getState() == BluetoothChatService.STATE_NONE) {
-                // Start the Bluetooth chat services
-                mChatService.start();
-
-            }
-        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        // Stop the Bluetooth chat services
-        if (mChatService != null) mChatService.stop();
         /*Media play */
-        if(mMediaPlayer != null) mMediaPlayer.release();
+        if (mMediaPlayer != null) mMediaPlayer.release();
     }
 
     @Override
@@ -258,6 +229,8 @@ public class ControlEPW_Fragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        //future maybe to use the optionItem menu.
+        /*
         switch (item.getItemId()) {
             case R.id.scan:
                 // Launch the DeviceListActivity to see devices and do scan
@@ -265,28 +238,16 @@ public class ControlEPW_Fragment extends Fragment {
                 startActivityForResult(serverIntent, REQUEST_CONNECT_DEVICE);
                 return true;
             case R.id.discoverable:
-                // Ensure this device is discoverable by others
-                ensureDiscoverable();
+                //empty.
                 return true;
-        }
+        }*/
         return false;
-    }
-
-    private void ensureDiscoverable() {
-        if (D) Log.d(TAG, "ensure discoverable");
-        if (mBluetoothAdapter.getScanMode() !=
-                BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
-            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-            startActivity(discoverableIntent);
-        }
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (D) Log.e(TAG, "+++ ON CREATE +++");
-        setupChat();
         setupController();
         setupJoystick();
         setupEPW_Info();
@@ -294,139 +255,43 @@ public class ControlEPW_Fragment extends Fragment {
 
     }
 
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case REQUEST_CONNECT_DEVICE:
-                // When DeviceListActivity returns with a device to connect
-                if (resultCode == Activity.RESULT_OK) {
-                    // Get the device MAC address
-                    String address = data.getExtras()
-                            .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
-                    // Get the BLuetoothDevice object
-                    BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
-                    // Attempt to connect to the device
-                    mChatService.connect(device);
-                }
-                break;
-            case REQUEST_ENABLE_BT:
-                // When the request to enable Bluetooth returns
-                if (resultCode == Activity.RESULT_OK) {
-                    // Bluetooth is now enabled, so set up a chat session
-                    setupChat();
-                    setupController();
-                    setupJoystick();
-                    setupEPW_Info();
-                    setupWebcam();
-
-                } else {
-                    // User did not enable Bluetooth or an error occured
-
-                    Toast.makeText(getActivity(), R.string.bt_not_enabled_leaving, Toast.LENGTH_SHORT).show();
-                    getActivity().finish();
-                }
-        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
-    // The action listener for the EditText widget, to listen for the return key
-    private TextView.OnEditorActionListener mWriteListener =
-            new TextView.OnEditorActionListener() {
-                public boolean onEditorAction(TextView view, int actionId, KeyEvent event) {
-                    // If the action is a key-up event on the return key, send the message
-                    if (actionId == EditorInfo.IME_NULL && event.getAction() == KeyEvent.ACTION_UP) {
-                        String message = view.getText().toString();
-                        //sendMessage(message);
-                    }
-                    if (D) Log.i(TAG, "END onEditorAction");
-                    return true;
-                }
-            };
-    // The Handler that gets information back from the BluetoothChatService
-    private final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case MESSAGE_STATE_CHANGE:
-                    if (D) Log.i(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
-                    switch (msg.arg1) {
-                        case BluetoothChatService.STATE_CONNECTED:
-                            mTitle.setText(R.string.title_connected_to);
-                            mTitle.append(mConnectedDeviceName);
-                            mConversationArrayAdapter.clear();
-                            break;
-                        case BluetoothChatService.STATE_CONNECTING:
-                            mTitle.setText(R.string.title_connecting);
-                            break;
-                        case BluetoothChatService.STATE_LISTEN:
-                        case BluetoothChatService.STATE_NONE:
-                            mTitle.setText(R.string.title_not_connected);
-                            break;
-                    }
-                    break;
 
-                case MESSAGE_WRITE:
-                    //I could not be to know I send what char.
-                    byte[] writeBuf = (byte[]) msg.obj;
-                    // construct a string from the buffer
-                    String writeMessage = new String(writeBuf);
-                    mConversationArrayAdapter.add("Me:  " + writeMessage);
-                    break;
-
-                case MESSAGE_READ:
-                    //byte[] readBuf = (byte[]) msg.obj;
-                    // construct a string from the valid bytes in the buffer
-                    //String readMessage = new String(readBuf, 0, msg.arg1);
-                    mConversationArrayAdapter.add(mConnectedDeviceName + ":" + msg.obj);
-                    break;
-                case MESSAGE_DEVICE_NAME:
-                    // save the connected device's name
-                    mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
-                    Toast.makeText(getActivity().getApplicationContext(), "Connected to "
-                            + mConnectedDeviceName, Toast.LENGTH_SHORT).show();
-                    break;
-                case MESSAGE_TOAST:
-                    Toast.makeText(getActivity().getApplicationContext(), msg.getData().getString(TOAST),
-                            Toast.LENGTH_SHORT).show();
-                    break;
-            }
-        }
-    };
-
-
-    private void setupChat() {
-        Log.d(TAG, "setupChat()");
-
-        // Initialize the array adapter for the conversation thread
-        mConversationArrayAdapter = new ArrayAdapter<String>(getActivity(), R.layout.message);
-
-        // Initialize the BluetoothChatService to perform bluetooth connections
-        mChatService = new BluetoothChatService(getActivity(), mHandler);
-        // Initialize the buffer for outgoing messages
-        mOutStringBuffer = new StringBuffer("");
-    }
-
-    private void setupWebcam(){
+    private void setupWebcam() {
         /*=========read the webcam from the url display to ImageView*/
         displayWebcam = (ImageView) getActivity().findViewById(R.id.webcam_read);
-        String URL = "http://10.0.0.1:8080/?action=snapshot";
-        displayWebcam.setTag(URL);/*set the url into the imageView.*/
+        String getWebcam_URL = SERVER_MAIN_URL + SERVER_TYPE_SNAPSHOT;
+        displayWebcam.setTag(getWebcam_URL);/*set the url into the imageView.*/
         new updateImagesTask().execute(displayWebcam); //start to loop update the Image from the server's webcam.
     }
 
-    private void setupEPW_Info(){
+    private void setupEPW_Info() {
         /*get JSON from the EPW server*/
-        new updateSmartEPW_Info_Task().execute("http://10.0.0.1:8080/output.json");
-
+        String getJSON_URL = SERVER_MAIN_URL + SERVER_TYPE_GETJSON;
+        new updateSmartEPW_Info_Task().execute(getJSON_URL);
         Kmh_display = (TextView) getActivity().findViewById(R.id.kmh_display);
-
+        Actuator_A_LS_Upper = (RadioButton) getActivity().findViewById(R.id.actuator_A_LS_Upper_radioButton);
+        Actuator_A_LS_Lower = (RadioButton) getActivity().findViewById(R.id.actuator_A_LS_Lower_radioButton);
+        Actuator_B_LS_Upper = (RadioButton) getActivity().findViewById(R.id.actuator_B_LS_Upper_radioButton);
+        Actuator_B_LS_Lower = (RadioButton) getActivity().findViewById(R.id.actuator_B_LS_Lower_radioButton);
     }
 
-    private void setupJoystick(){
+    private void setupJoystick() {
+
         /*testing debug mode*/
         mStateTextView = (TextView) getActivity().findViewById(R.id.state_textView);
 
         mAngleTextView = (TextView) getActivity().findViewById(R.id.angleTextView);
         mPowerTextView = (TextView) getActivity().findViewById(R.id.powerTextView);
         mDirectionTextView = (TextView) getActivity().findViewById(R.id.directionTextView);
+
+        /*it's used to showing the Joystick's direction by ImageView*/
+        dir_image = (ImageView) getActivity().findViewById(R.id.direction_imageView);
 
         //Referencing also other views
         mJoystick = (JoystickView) getActivity().findViewById(R.id.joystickView);
@@ -441,7 +306,7 @@ public class ControlEPW_Fragment extends Fragment {
                     case JoystickView.FRONT:
                         mDirectionTextView.setText(R.string.front_lab);
                         mStateTextView.setText("Forward");
-                        sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'f');
+                        sendCommandToEPW(GROUP_EPW, ID_EPW_MOTOR_DIRECTION, 'f');
                         dir_image.setImageResource(R.drawable.v1_arrow_up);
                         break;
                     case JoystickView.FRONT_RIGHT:
@@ -450,7 +315,7 @@ public class ControlEPW_Fragment extends Fragment {
                     case JoystickView.RIGHT:
                         mDirectionTextView.setText(R.string.right_lab);
                         mStateTextView.setText("Right");
-                        sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'r');
+                        sendCommandToEPW(GROUP_EPW, ID_EPW_MOTOR_DIRECTION, 'r');
                         dir_image.setImageResource(R.drawable.v1_arrow_right);
                         break;
                     case JoystickView.BACK_RIGHT:
@@ -459,7 +324,7 @@ public class ControlEPW_Fragment extends Fragment {
                     case JoystickView.BACK:
                         mDirectionTextView.setText(R.string.back_lab);
                         mStateTextView.setText("Backward");
-                        sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'b');
+                        sendCommandToEPW(GROUP_EPW, ID_EPW_MOTOR_DIRECTION, 'b');
                         dir_image.setImageResource(R.drawable.v1_arrow_down);
                         break;
                     case JoystickView.BACK_LEFT:
@@ -468,7 +333,7 @@ public class ControlEPW_Fragment extends Fragment {
                     case JoystickView.LEFT:
                         mDirectionTextView.setText(R.string.left_lab);
                         mStateTextView.setText("Left");
-                        sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'l');
+                        sendCommandToEPW(GROUP_EPW, ID_EPW_MOTOR_DIRECTION, 'l');
                         dir_image.setImageResource(R.drawable.v1_arrow_left);
                         break;
                     case JoystickView.FRONT_LEFT:
@@ -477,14 +342,13 @@ public class ControlEPW_Fragment extends Fragment {
                     default:/*center*/
                         mDirectionTextView.setText(R.string.center_lab);
                         mStateTextView.setText("Stop");
+                        sendCommandToEPW(GROUP_EPW, ID_EPW_MOTOR_DIRECTION, 's');
                         dir_image.setImageResource(R.drawable.stop_icon_v1);
-                        sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'s');
                 }
             }
         }, JoystickView.DEFAULT_LOOP_INTERVAL);
 
-        /*it's used to showing the Joystick's direction by ImageView*/
-        dir_image = (ImageView) getActivity().findViewById(R.id.direction_imageView);
+
     }
 
 
@@ -494,16 +358,17 @@ public class ControlEPW_Fragment extends Fragment {
         /*create new object of the send command method in AsyncTask.*/
         new Http_sendCommand_Task().execute(SERVER_MAIN_URL);
 
-
         /**
          * SeekBar
          * Ref to https://github.com/AndroSelva/Vertical-SeekBar-Android
          **/
-        //Speed of Seekbar
-        mSpeedSeekBar=(SeekBar)getActivity().findViewById(R.id.ctrl_speed);
-        mSpeedSeekBar_Progress=(TextView)getActivity().findViewById(R.id.ctrl_speed_value);
-        mSpeedSeekBar.setMax(10);
-        mSpeedSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+        //distance of Seekbar
+        mDistanceSeekBar = (SeekBar) getActivity().findViewById(R.id.ctrl_distance);
+        mDistanceSeekBar_Progress = (TextView) getActivity().findViewById(R.id.ctrl_distance_value);
+        mDistanceSeekBar.setMax(10);
+        sendCommandToEPW(GROUP_EPW, ID_EPW_MOTOR_Distance, mDistanceSeekBar.getProgress()); //send current distance value to smartEPW for start up.
+        sendCommandToEPW(GROUP_EPW, ID_EPW_MOTOR_DIRECTION, 's');//stop for start up.
+        mDistanceSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 // TODO Auto-generated method stub
@@ -517,13 +382,13 @@ public class ControlEPW_Fragment extends Fragment {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress,
                                           boolean fromUser) {
-                mSpeedSeekBar_Progress.setText(String.valueOf(progress));
-                sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_SPEED,mSpeedSeekBar.getProgress());
+                mDistanceSeekBar_Progress.setText(String.valueOf(progress));
+                sendCommandToEPW(GROUP_EPW, ID_EPW_MOTOR_Distance, progress);
             }
         });
         //Delay of Seekbar
-        mDurationSeekBar=(SeekBar)getActivity().findViewById(R.id.ctrl_duration);
-        mDurationSeekBar_Progress=(TextView)getActivity().findViewById(R.id.ctrl_duration_value);
+        mDurationSeekBar = (SeekBar) getActivity().findViewById(R.id.ctrl_duration);
+        mDurationSeekBar_Progress = (TextView) getActivity().findViewById(R.id.ctrl_duration_value);
         mDurationSeekBar.setMax(50);
         mDurationSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -535,6 +400,7 @@ public class ControlEPW_Fragment extends Fragment {
             public void onStartTrackingTouch(SeekBar seekBar) {
                 // TODO Auto-generated method stub
             }
+
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress,
                                           boolean fromUser) {
@@ -544,125 +410,184 @@ public class ControlEPW_Fragment extends Fragment {
                  * so the dir_ctrl_duration will convert to msec.
                  *
                  **/
-                dir_ctrl_duration = mDurationSeekBar.getProgress()*100;
+                dir_ctrl_duration = progress * 100;
             }
         });
 
 
-        /*Speed control of button*/
-        mSpeedPlusBtn = (Button)getActivity().findViewById(R.id.ctrl_speed_plus);
-        mSpeedPlusBtn.setOnClickListener(new View.OnClickListener() {
+        /*distance control of button*/
+        mDistancePlusBtn = (Button) getActivity().findViewById(R.id.ctrl_distance_plus);
+        mDistancePlusBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mSpeedSeekBar.getProgress() >= mSpeedSeekBar.getMax()) {
+                if (mDistanceSeekBar.getProgress() >= mDistanceSeekBar.getMax()) {
                     return;
-                }
-                else {
-                    mSpeedSeekBar.setProgress(mSpeedSeekBar.getProgress() + 1);
-                    mSpeedSeekBar_Progress.setText(String.valueOf(mSpeedSeekBar.getProgress()));
-                    /*motor speed value of EPW divided into ten parts, the stm32f4 allowing of acceptable pwm range is 0 to 120, corresponds 0 to 2.5 volts*/
-                    //sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_SPEED,mSpeedSeekBar.getProgress());
-
+                } else {
+                    mDistanceSeekBar.setProgress(mDistanceSeekBar.getProgress() + 1);
                 }
             }
         });
-        mSpeedMinusBtn = (Button)getActivity().findViewById(R.id.ctrl_speed_minus);
-        mSpeedMinusBtn.setOnClickListener(new View.OnClickListener() {
+        mDistanceMinusBtn = (Button) getActivity().findViewById(R.id.ctrl_distance_minus);
+        mDistanceMinusBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mSpeedSeekBar.getProgress() <= 0) {
+                if (mDistanceSeekBar.getProgress() <= 0) {
                     return;
-                }
-                else {
-                    mSpeedSeekBar.setProgress(mSpeedSeekBar.getProgress() - 1);
-                    mSpeedSeekBar_Progress.setText(String.valueOf(mSpeedSeekBar.getProgress()));
-                    /*motor speed value of EPW divided into ten parts, the stm32f4 allowing of acceptable pwm range is 0 to 120, corresponds 0 to 2.5 volts*/
-                    //sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_SPEED,mSpeedSeekBar.getProgress());
+                } else {
+                    mDistanceSeekBar.setProgress(mDistanceSeekBar.getProgress() - 1);
                 }
             }
         });
         /*Delay control of button*/
-        mDurationPlusBtn = (Button)getActivity().findViewById(R.id.ctrl_duration_plus);
+        mDurationPlusBtn = (Button) getActivity().findViewById(R.id.ctrl_duration_plus);
         mDurationPlusBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mDurationSeekBar.getProgress() >= mDurationSeekBar.getMax()) {
+                if (mDurationSeekBar.getProgress() >= mDurationSeekBar.getMax()) {
                     return;
-                }
-                else {
+                } else {
                     mDurationSeekBar.setProgress(mDurationSeekBar.getProgress() + 5);
-                    mDurationSeekBar_Progress.setText(String.valueOf(FormatConvert.IntToFloatByScale(mDurationSeekBar.getProgress(), 0.1f)));
-                    /**
-                     * dir_ctrl_duration is represent millisecond,
-                     * so the dir_ctrl_duration will convert to msec.
-                     *
-                     **/
-                    dir_ctrl_duration = mDurationSeekBar.getProgress()*100;
                 }
             }
         });
-        mDurationMinusBtn = (Button)getActivity().findViewById(R.id.ctrl_duration_minus);
+        mDurationMinusBtn = (Button) getActivity().findViewById(R.id.ctrl_duration_minus);
         mDurationMinusBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mDurationSeekBar.getProgress() <= 0) {
+                if (mDurationSeekBar.getProgress() <= 0) {
                     return;
-                }
-                else {
+                } else {
                     mDurationSeekBar.setProgress(mDurationSeekBar.getProgress() - 5);
-                    mDurationSeekBar_Progress.setText(String.valueOf(FormatConvert.IntToFloatByScale(mDurationSeekBar.getProgress(), 0.1f)));
-                    /**
-                     * dir_ctrl_duration is represent millisecond,
-                     * so the dir_ctrl_duration will convert to msec.
-                     *
-                     **/
-                    dir_ctrl_duration = mDurationSeekBar.getProgress()*100;
                 }
             }
         });
+
+
+        mActuator_A_MinusBtn = (Button) getActivity().findViewById(R.id.actuA_ctrl_minus);
+        mActuator_A_MinusBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendCommandToEPW(GROUP_EPW, ID_EPW_LINEAR_ACTUATOR_A, 2);
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                sendCommandToEPW(GROUP_EPW, ID_EPW_LINEAR_ACTUATOR_A, 0);
+            }
+        });
+        mActuator_A_PlusBtn = (Button) getActivity().findViewById(R.id.actuA_ctrl_plus);
+        mActuator_A_PlusBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendCommandToEPW(GROUP_EPW, ID_EPW_LINEAR_ACTUATOR_A, 1);
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                sendCommandToEPW(GROUP_EPW, ID_EPW_LINEAR_ACTUATOR_A, 0);
+            }
+        });
+        mActuator_B_MinusBtn = (Button) getActivity().findViewById(R.id.actuB_ctrl_minus);
+        mActuator_B_MinusBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendCommandToEPW(GROUP_EPW, ID_EPW_LINEAR_ACTUATOR_B, 2);
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                sendCommandToEPW(GROUP_EPW, ID_EPW_LINEAR_ACTUATOR_B, 0);
+            }
+        });
+        mActuator_B_PlusBtn = (Button) getActivity().findViewById(R.id.actuB_ctrl_plus);
+        mActuator_B_PlusBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendCommandToEPW(GROUP_EPW, ID_EPW_LINEAR_ACTUATOR_B, 1);
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                sendCommandToEPW(GROUP_EPW, ID_EPW_LINEAR_ACTUATOR_B, 0);
+            }
+        });
+
+        /*for PID adjust*/
+        mKp_EditText = (EditText) getActivity().findViewById(R.id.Kp_editText);
+        mKi_EditText = (EditText) getActivity().findViewById(R.id.Ki_editText);
+        mKd_EditText = (EditText) getActivity().findViewById(R.id.Kd_editText);
+
+        mPID_par_send = (Button) getActivity().findViewById(R.id.PID_par_send);
+        mPID_par_send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sendCommandToEPW(GROUP_EPW, ID_PID_ALG_KP, Integer.valueOf(String.valueOf(mKp_EditText.getText())));
+                sendCommandToEPW(GROUP_EPW, ID_PID_ALG_KI,  Integer.valueOf(String.valueOf(mKi_EditText.getText())));
+                sendCommandToEPW(GROUP_EPW, ID_PID_ALG_KD,  Integer.valueOf(String.valueOf(mKd_EditText.getText())));
+            }
+        });
+
     }
 
 
     /**
-     *  accept user input the keydown event
-     *  and calculate the joystick's circle direction
-     **/
-    public void myOnKeyDown(int keyCode , KeyEvent event){
+     * accept user input the keydown event
+     * and calculate the joystick's circle direction
+     */
+    public void myOnKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_I:/*up*/
-                mJoystick.setPostion((mJoystick.getWidth())/ 2 , 0);
+                mJoystick.setPostion((mJoystick.getWidth()) / 2, 0);
                 mJoystick.invalidate(); /*invalidate is implement to move the joystick's circle*/
-                sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'f');
+                sendCommandToEPW(GROUP_EPW, ID_EPW_MOTOR_DIRECTION, 'f');
                 dir_image.setImageResource(R.drawable.v1_arrow_up);
                 isMoved = true;
+                mAngleTextView.setText(" " + String.valueOf(0) + "°");
+                mPowerTextView.setText(" " + String.valueOf(100) + "%");
+                mDirectionTextView.setText(R.string.front_lab);
                 break;
             case KeyEvent.KEYCODE_M:/*down*/
-                mJoystick.setPostion((mJoystick.getWidth())/ 2 , mJoystick.getHeight());
+                mJoystick.setPostion((mJoystick.getWidth()) / 2, mJoystick.getHeight());
                 mJoystick.invalidate();
-                sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'b');
+                sendCommandToEPW(GROUP_EPW, ID_EPW_MOTOR_DIRECTION, 'b');
                 dir_image.setImageResource(R.drawable.v1_arrow_down);
                 isMoved = true;
+                mAngleTextView.setText(" " + String.valueOf(180) + "°");
+                mPowerTextView.setText(" " + String.valueOf(100) + "%");
+                mDirectionTextView.setText(R.string.back_lab);
                 break;
             case KeyEvent.KEYCODE_T:/*left*/
-                mJoystick.setPostion(0 , mJoystick.getHeight()/2);
+                mJoystick.setPostion(0, mJoystick.getHeight() / 2);
                 mJoystick.invalidate();
-                sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'l');
+                sendCommandToEPW(GROUP_EPW, ID_EPW_MOTOR_DIRECTION, 'l');
                 dir_image.setImageResource(R.drawable.v1_arrow_left);
                 isMoved = true;
+                mAngleTextView.setText(" " + String.valueOf(-90) + "°");
+                mPowerTextView.setText(" " + String.valueOf(100) + "%");
+                mDirectionTextView.setText(R.string.left_lab);
                 break;
             case KeyEvent.KEYCODE_E:/*right && stop*/
-                if(isMoved){
+                if (isMoved) {
                     /*stop to move*/
-                    mJoystick.setPostion(mJoystick.getWidth()/2 , mJoystick.getHeight()/2);
-                    sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'s');
+                    mJoystick.setPostion(mJoystick.getWidth() / 2, mJoystick.getHeight() / 2);
+                    sendCommandToEPW(GROUP_EPW, ID_EPW_MOTOR_DIRECTION, 's');
                     dir_image.setImageResource(R.drawable.stop_icon_v1);
                     isMoved = false;
-                }
-                else{/*right*/
-                    mJoystick.setPostion(mJoystick.getWidth() , mJoystick.getHeight()/2);
-                    sendCommandToEPW(GROUP_EPW,ID_EPW_MOTOR_DIRECTION,'r');
+                    mAngleTextView.setText(" " + String.valueOf(0) + "°");
+                    mPowerTextView.setText(" " + String.valueOf(0) + "%");
+                    mDirectionTextView.setText(R.string.center_lab);
+                } else {/*right*/
+                    mJoystick.setPostion(mJoystick.getWidth(), mJoystick.getHeight() / 2);
+                    sendCommandToEPW(GROUP_EPW, ID_EPW_MOTOR_DIRECTION, 'r');
                     dir_image.setImageResource(R.drawable.v1_arrow_right);
                     isMoved = true;
+                    mAngleTextView.setText(" " + String.valueOf(90) + "°");
+                    mPowerTextView.setText(" " + String.valueOf(100) + "%");
+                    mDirectionTextView.setText(R.string.right_lab);
                 }
                 mJoystick.invalidate();
                 break;
@@ -680,13 +605,15 @@ public class ControlEPW_Fragment extends Fragment {
             public void run() {
                 /*stop to move*/
                 mJoystick.setPostion(mJoystick.getWidth() / 2, mJoystick.getHeight() / 2);
+                sendCommandToEPW(GROUP_EPW, ID_EPW_MOTOR_DIRECTION, 's');
+                dir_image.setImageResource(R.drawable.stop_icon_v1);
+                isMoved = false;
 
                 mAngleTextView.setText(" " + String.valueOf(0) + "°");
                 mPowerTextView.setText(" " + String.valueOf(0) + "%");
                 mDirectionTextView.setText(R.string.center_lab);
-
                 mJoystick.invalidate();
-                isMoved = false;
+
             }
         }, dir_ctrl_duration);
     }
@@ -694,32 +621,35 @@ public class ControlEPW_Fragment extends Fragment {
     /**
      * send command to EPW of stm32f4 MCU using by http get method.
      * for example http request such as:
-     * http://140.116.164.46:8080/?action=command&dest=1&plugin=0&id=100&group=0&value=102
+     * http://10.0.0.1:8080/?action=command&dest=1&plugin=0&id=100&group=0&value=102
+     *
      * @param group, id, value.
      */
-    public void sendCommandToEPW(int group,int id,int value){
+    public void sendCommandToEPW(int group, int id, int value) {
         //note, dest and plugin are fixed.
-        server_parameter = "&dest=1&plugin=0" + ("&group="+String.valueOf(group)) + ("&id="+String.valueOf(id)) + ("&value="+String.valueOf(value));
-        Log.d("JackABK",server_parameter);
+        server_parameter = "&dest=1&plugin=0" + ("&group=" + String.valueOf(group)) + ("&id=" + String.valueOf(id)) + ("&value=" + String.valueOf(value));
+        Log.d("JackABK", server_parameter);
         ready_to_send_command = true;
     }
+
     /**
      * play all of the sound.
+     *
      * @param resId, for example: R.raw.test
      */
-    public void playSound(int resId){
-        mMediaPlayer = MediaPlayer.create(getActivity() , resId);
+    public void playSound(int resId) {
+        mMediaPlayer = MediaPlayer.create(getActivity(), resId);
         mMediaPlayer.start();
     }
-
 
 
     /**
      * using http get method to parse the url, note that should be running in background thread, cannot in the UI thread,
      * so that the function must be in AsyncTask.
+     *
      * @param url
      */
-    private  String HTTP_GET_PARSER(String url){
+    private String HTTP_GET_PARSER(String url) {
         InputStream inputStream = null;
         String result = "";
         try {
@@ -734,11 +664,11 @@ public class ControlEPW_Fragment extends Fragment {
             inputStream = httpResponse.getEntity().getContent();
 
             // convert inputstream to string
-            if(inputStream != null)
+            if (inputStream != null)
                 result = convertInputStreamToString(inputStream);
             else
                 result = "Did not work!";
-                Toast.makeText(this.getActivity(), "Host not found!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this.getActivity(), "Host not found!", Toast.LENGTH_SHORT).show();
 
         } catch (Exception e) {
             Log.d("InputStream", e.getLocalizedMessage());
@@ -747,11 +677,11 @@ public class ControlEPW_Fragment extends Fragment {
         return result;
     }
 
-    private  String convertInputStreamToString(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
+    private String convertInputStreamToString(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
         String line = "";
         String result = "";
-        while((line = bufferedReader.readLine()) != null)
+        while ((line = bufferedReader.readLine()) != null)
             result += line;
 
         inputStream.close();
@@ -766,24 +696,25 @@ public class ControlEPW_Fragment extends Fragment {
     public class updateImagesTask extends AsyncTask<ImageView, Bitmap, Bitmap> {
 
         ImageView imageView = null;
-        Bitmap Bitmap_temp =null;
-        int frame_count=0; /*calculate the frame count.*/
-        double current_time=0;
+        Bitmap Bitmap_temp = null;
+        int frame_count = 0; /*calculate the frame count.*/
+        double current_time = 0;
+
         @Override
         protected Bitmap doInBackground(ImageView... imageViews) {
             this.imageView = imageViews[0];
-                try {
+            try {
                     /*loop read the webcam of image from the url.*/
-                    while (true){
-                        Bitmap_temp = getBitmapFromURL((String)imageView.getTag());
-                        publishProgress(Bitmap_temp); /*update the ImageView.*/
-                        frame_count++;
-                        Thread.sleep(30); /*sampling period, unit : ms */
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                while (true) {
+                    Bitmap_temp = getBitmapFromURL((String) imageView.getTag());
+                    publishProgress(Bitmap_temp); /*update the ImageView.*/
+                    frame_count++;
+                    Thread.sleep(30); /*sampling period, unit : ms */
                 }
-                return Bitmap_temp; /*Last Bitmap image result when stop to looping.*/
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return Bitmap_temp; /*Last Bitmap image result when stop to looping.*/
         }
 
         @Override
@@ -796,12 +727,12 @@ public class ControlEPW_Fragment extends Fragment {
         protected void onPostExecute(Bitmap result) {
             super.onPostExecute(result);
             imageView.setImageBitmap(result);
+
         }
+
         /*read the picture from url, the type is Bitmap*/
-        private Bitmap getBitmapFromURL(String imageUrl)
-        {
-            try
-            {
+        private Bitmap getBitmapFromURL(String imageUrl) {
+            try {
                 URL url = new URL(imageUrl);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setDoInput(true);
@@ -809,22 +740,21 @@ public class ControlEPW_Fragment extends Fragment {
                 InputStream input = connection.getInputStream();
                 Bitmap bitmap = BitmapFactory.decodeStream(input);
                 return bitmap;
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
                 return null;
             }
         }
     }
 
-    private class updateSmartEPW_Info_Task extends AsyncTask<String, Void, String> {
+    private class updateSmartEPW_Info_Task extends AsyncTask<String, Integer, String> {
+        JSONObject json = null;
+        JSONArray controls = null; //the json group name.
+        double kmh_temp;
         @Override
         protected String doInBackground(String... urls) {
-            JSONObject json = null;
-            JSONArray controls = null;
             int i;
-            while(true) {
+            while (true) {
                 try {
                     json = new JSONObject(HTTP_GET_PARSER(urls[0]));
 
@@ -841,44 +771,131 @@ public class ControlEPW_Fragment extends Fragment {
 
                     controls = json.getJSONArray("controls");
                     /*scanning all information of json to find out the expected index*/
-                    for(i=0;i<json.getJSONArray("controls").length();i++){
-                        if(Integer.valueOf(controls.getJSONObject(i).getString("id"))== ID_MOTOR_RIGHT_RPM )
-                            ;//Kmh_display.setText(controls.getJSONObject(i).getString("value"));
+                    for (i = 0; i < json.getJSONArray("controls").length(); i++) {
+                        publishProgress(i); /*update the info of index.*/
                     }
+                    Thread.sleep(50);
                 } catch (JSONException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-
+                catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
             //return HTTP_GET_PARSER(urls[0]); //without return to PostExecute.
         }
-        @Override
-        protected void onPostExecute(String result) {
-           ;
-        }
-    }
 
-    /**
-     * A {@link this#sendCommandToEPW} that update the url parameter and response the "ready_to_send_command" of signal.
-     * This Task will loop processing the URL to Request server using http get method.
-     */
-    private class Http_sendCommand_Task extends AsyncTask<String, Void, String> {
         @Override
-        protected String doInBackground(String... urls) {
-            server_url = urls[0];
-            while(true) {
-                if(ready_to_send_command){
-                    HTTP_GET_PARSER(server_url + SERVER_TYPE_COMMAND + server_parameter);
-                    ready_to_send_command = false;//back to non-ready of state
+        protected void onProgressUpdate(Integer... values) {
+            super.onProgressUpdate(values);
+            try {
+                switch (Integer.valueOf(controls.getJSONObject(values[0]).getString("id"))) {
+                    case ID_ACTUATOR_A_LS:
+                        update_actuator_A_LS(controls.getJSONObject(values[0]).getString("value"));
+                        break;
+                    case ID_ACTUATOR_B_LS:
+                        update_actuator_B_LS(controls.getJSONObject(values[0]).getString("value"));
+                        break;
+                    case ID_MOTOR_RIGHT_RPM:
+                        update_kmh(controls.getJSONObject(values[0]).getString("value"));
+                        break;
+                    default:
+                        break;
                 }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
-        // onPostExecute displays the results of the AsyncTask.
+
         @Override
         protected void onPostExecute(String result) {
-            ;//don't need to parse the result string.
+            ;
+        }
+
+
+        private void update_kmh(String kmh_value) {
+
+            //0.11 = 60*22*2.54*3.14159 / 100 / 1000
+            kmh_temp = Integer.valueOf(kmh_value) *0.11;
+
+            Kmh_display.setText(String.valueOf( kmh_temp));
+            Log.d(TAG, kmh_value);
+        }
+
+        private void update_actuator_A_LS(String actuator_A_LS_value) {
+            switch (Integer.valueOf(actuator_A_LS_value)) {
+                //normal state.
+                case 0:
+                    Actuator_A_LS_Upper.setChecked(false);
+                    Actuator_A_LS_Lower.setChecked(false);
+                    break;
+                //upper limited.
+                case 1:
+                    Actuator_A_LS_Upper.setChecked(true);
+                    Actuator_A_LS_Lower.setChecked(false);
+                    break;
+                //lower limited.
+                case 2:
+                    Actuator_A_LS_Upper.setChecked(false);
+                    Actuator_A_LS_Lower.setChecked(true);
+                    break;
+                /*impossibility*/
+                case 3:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void update_actuator_B_LS(String actuator_B_LS_value) {
+            switch (Integer.valueOf(actuator_B_LS_value)) {
+                //normal state.
+                case 0:
+                    Actuator_B_LS_Upper.setChecked(false);
+                    Actuator_B_LS_Lower.setChecked(false);
+                    break;
+                //upper limited.
+                case 1:
+                    Actuator_B_LS_Upper.setChecked(true);
+                    Actuator_B_LS_Lower.setChecked(false);
+                    break;
+                //lower limited.
+                case 2:
+                    Actuator_B_LS_Upper.setChecked(false);
+                    Actuator_B_LS_Lower.setChecked(true);
+                    break;
+                /*impossibility*/
+                case 3:
+                    break;
+                default:
+                    break;
+            }
         }
     }
 
-}
+        /**
+         * A {@link this#sendCommandToEPW} that update the url parameter and response the "ready_to_send_command" of signal.
+         * This Task will loop processing the URL to Request server using http get method.
+         */
+        private class Http_sendCommand_Task extends AsyncTask<String, Void, String> {
+            @Override
+            protected String doInBackground(String... urls) {
+                server_url = urls[0];
+                while (true) {
+                    if (ready_to_send_command) {
+                        HTTP_GET_PARSER(server_url + SERVER_TYPE_COMMAND + server_parameter);
+                        ready_to_send_command = false;//back to non-ready of state
+                    }
+                }
+            }
+
+            // onPostExecute displays the results of the AsyncTask.
+            @Override
+            protected void onPostExecute(String result) {
+                ;//don't need to parse the result string.
+            }
+        }
+
+    }
+
