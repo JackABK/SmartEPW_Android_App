@@ -535,18 +535,6 @@
             <Button
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:text="Y"
-                android:id="@+id/PID_par_send"
-                android:background="@drawable/button_style_1"
-                android:textColor="@android:color/white"
-                android:textSize="25dp"
-                android:layout_alignBaseline="@+id/textView11"
-                android:layout_alignBottom="@+id/textView11"
-                android:layout_alignParentRight="true" />
-
-            <Button
-                android:layout_width="30dp"
-                android:layout_height="30dp"
                 android:text="S"
                 android:id="@+id/actuB_stop"
                 android:background="@drawable/button_style_1"
@@ -593,21 +581,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/Kp_editText"
                 android:layout_alignTop="@+id/textView5"
-                android:layout_alignRight="@+id/actuA_stop" />
-
-            <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/Ki_editText"
-                android:layout_alignTop="@+id/textView5"
-                android:layout_toRightOf="@+id/actuA_stop" />
-
-            <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/Kd_editText"
-                android:layout_below="@+id/ctrl_duration"
-                android:layout_toRightOf="@+id/Ki_editText" />
+                android:layout_alignRight="@+id/ctrl_duration" />
 
 
         </RelativeLayout>

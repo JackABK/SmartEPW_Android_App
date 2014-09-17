@@ -475,7 +475,10 @@ public class ControlEPW_Fragment extends Fragment {
                 sendCommandToEPW(GROUP_EPW, ID_EPW_LINEAR_ACTUATOR_B, 0);
             }
         });
+
+
         /*for PID adjust*/
+        /*
         mKp_EditText = (EditText) getActivity().findViewById(R.id.Kp_editText);
         mKi_EditText = (EditText) getActivity().findViewById(R.id.Ki_editText);
         mKd_EditText = (EditText) getActivity().findViewById(R.id.Kd_editText);
@@ -489,6 +492,7 @@ public class ControlEPW_Fragment extends Fragment {
                 sendCommandToEPW(GROUP_EPW, ID_PID_ALG_KD,  Integer.valueOf(String.valueOf(mKd_EditText.getText())));
             }
         });
+        */
     }
     /**
      * accept user input the keydown event
@@ -724,7 +728,7 @@ public class ControlEPW_Fragment extends Fragment {
                     for (i = 0; i < json.getJSONArray("controls").length(); i++) {
                         publishProgress(i); /*update the info of index.*/
                     }
-                    Thread.sleep(50);
+                    Thread.sleep(500);
                 } catch (JSONException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
